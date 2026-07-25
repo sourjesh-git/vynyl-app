@@ -130,7 +130,12 @@ export function useYouTubePlayer(containerId: string) {
     if (!ready || !playerRef.current || !playback) return;
 
     syncingRef.current = true;
-    const posSec = playback.positionMs / 1000;
+    
+    let posMs = playback.positionMs;
+    if (playback.playing && playback.startedAt) {
+      posMs += (Date.now() - playback.startedAt);
+    }
+    const posSec = posMs / 1000;
 
     if (playback.playing) {
       playerRef.current.seekTo(posSec, true);

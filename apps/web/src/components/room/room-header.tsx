@@ -23,7 +23,7 @@ export function RoomHeader() {
   return (
     <header className="flex items-center justify-between border-b border-border px-6 py-4">
       <div className="flex items-center gap-4">
-        <span className="text-lg font-semibold">Vynyl</span>
+        <span className="text-xl font-bold tracking-tight text-[#1B1B1B] font-satoshi lowercase">vynyl</span>
         <div className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-1.5">
           <span className="font-mono text-sm tracking-widest">{room.code}</span>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={copyCode}>

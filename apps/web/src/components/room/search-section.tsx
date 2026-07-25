@@ -110,9 +110,9 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
                 <p className="truncate text-sm font-semibold text-[#1B1B1B] leading-tight font-satoshi">
                   {result.title}
                 </p>
-                <p className="truncate text-[10px] text-[#1B1B1B]/55 font-medium tracking-wide mt-0.5 font-satoshi">
+                <p className="truncate text-[10px] text-[#1B1B1B] font-medium tracking-wide mt-0.5 font-satoshi">
                   {result.artist} ·{' '}
-                  <span className="opacity-80">{formatDuration(result.duration)}</span>
+                  <span>{formatDuration(result.duration)}</span>
                 </p>
               </div>
 

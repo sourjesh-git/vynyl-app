@@ -47,8 +47,31 @@ export function RoomPage({ code }: { code: string }) {
 
     const join = async () => {
       joinedRef.current = true;
-      const name = searchParams.get('name') ?? generateGuestName();
-      const existingMemberId = searchParams.get('memberId');
+      const roomCodeUpper = code.toUpperCase();
+      const storageKey = `vynyl_room_${roomCodeUpper}`;
+      
+      let existingMemberId = searchParams.get('memberId');
+      let name = searchParams.get('name');
+
+      if (!existingMemberId) {
+        try {
+          const stored = localStorage.getItem(storageKey);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            existingMemberId = parsed.memberId;
+            if (!name) {
+              name = parsed.name;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to load credentials from localStorage', e);
+        }
+      }
+
+      if (!name) {
+        name = generateGuestName();
+      }
+
       const socket = useRoomStore.getState().socket;
 
       const applyJoin = (response: {
@@ -66,6 +89,15 @@ export function RoomPage({ code }: { code: string }) {
           currentIndex: response.currentIndex ?? -1,
         });
 
+        try {
+          localStorage.setItem(
+            storageKey,
+            JSON.stringify({ memberId: response.memberId, name: response.memberName })
+          );
+        } catch (e) {
+          console.error('Failed to save credentials to localStorage', e);
+        }
+
         toast({
           title: 'Welcome to the room!',
           description: `Joined room ${response.room.code} as ${response.memberName}.`,
@@ -78,7 +110,7 @@ export function RoomPage({ code }: { code: string }) {
             applyJoin({
               room: response.room,
               memberId: response.memberId,
-              memberName: response.memberName ?? name,
+              memberName: response.memberName ?? name ?? '',
               queue: response.queue,
               currentIndex: response.currentIndex,
             });
@@ -123,7 +155,7 @@ export function RoomPage({ code }: { code: string }) {
         applyJoin(result);
 
         if (socket?.connected) {
-          socket.emit('join-room', { code, name, memberId: result.memberId }, () => {});
+          socket.emit('join-room', { code, name, memberId: result.memberId }, () => { });
         }
       } catch {
         toast({
@@ -218,7 +250,7 @@ export function RoomPage({ code }: { code: string }) {
           {/* Top Bar Header (Search, Theme switcher, Profile details) */}
           <header className="flex items-center justify-between px-8 py-5 shrink-0 z-40">
             {/* Global Search Input */}
-            <div className="relative w-96 z-50">
+            <div className="relative w-[450px] max-w-full z-50">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1B1B1B]/40" />
               <input
                 ref={inputRef}
@@ -245,7 +277,7 @@ export function RoomPage({ code }: { code: string }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full left-0 w-[420px] mt-2 rounded-3xl bg-white/95 backdrop-blur-md border border-[#EBE1D6] p-4.5 shadow-[0_12px_36px_rgba(0,0,0,0.08)] max-h-[380px] overflow-y-auto z-50 flex flex-col gap-3 text-[#1B1B1B]"
+                    className="absolute top-full left-0 w-full mt-2 rounded-3xl bg-white/95 backdrop-blur-md border border-[#EBE1D6] p-5 shadow-[0_12px_36px_rgba(0,0,0,0.08)] max-h-[380px] overflow-y-auto z-50 flex flex-col gap-3 text-[#1B1B1B]"
                   >
                     <div className="flex items-center justify-between pb-1.5 border-b border-black/5">
                       <span className="text-[10px] font-bold text-[#1B1B1B]/55 tracking-wider uppercase font-satoshi">
@@ -314,21 +346,21 @@ export function RoomPage({ code }: { code: string }) {
       <div className="md:hidden flex flex-col flex-1 w-full min-h-screen pb-20 overflow-hidden">
         {/* Top Header bar */}
         <header className="flex items-center justify-between border-b border-black/5 bg-[#F6F3EE]/80 backdrop-blur-md px-5 py-4 sticky top-0 z-40">
-            <div className="flex items-center gap-2.5">
-              {/* Custom Groove record spiral logo */}
-              <div className="relative h-6 w-6 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border border-charcoal/20 flex items-center justify-center animate-spin-slow">
-                  <div className="h-4.5 w-4.5 rounded-full border border-charcoal/30 flex items-center justify-center">
-                    <div className="h-2.5 w-2.5 rounded-full border border-charcoal/45 flex items-center justify-center">
-                      <div className="h-1 w-1 bg-charcoal rounded-full" />
-                    </div>
+          <div className="flex items-center gap-2.5">
+            {/* Custom Groove record spiral logo */}
+            <div className="relative h-7 w-7 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border border-charcoal/20 flex items-center justify-center animate-spin-slow">
+                <div className="h-5 w-5 rounded-full border border-charcoal/30 flex items-center justify-center">
+                  <div className="h-3 w-3 rounded-full border border-charcoal/40 flex items-center justify-center">
+                    <div className="h-1 w-1 bg-charcoal rounded-full" />
                   </div>
                 </div>
               </div>
-              <span className="text-xl font-bold tracking-tight text-[#1B1B1B] font-satoshi lowercase">
-                vynyl
-              </span>
             </div>
+             <span className="text-xl font-bold tracking-tight text-black font-satoshi lowercase">
+              vynyl
+            </span>
+          </div>
 
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-[#EBE1D6] border border-black/5 text-[#1B1B1B]/75 font-satoshi">
@@ -398,9 +430,8 @@ export function RoomPage({ code }: { code: string }) {
         <nav className="fixed bottom-0 left-0 right-0 h-16 border-t border-black/5 bg-[#F6F3EE]/90 backdrop-blur-md flex items-center justify-around px-4 z-40">
           <button
             onClick={() => setActiveTab('search')}
-            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-3 rounded-xl transition-all ${
-              activeTab === 'search' ? 'text-[#E07A5F]' : 'text-[#1B1B1B]/40 hover:text-[#1B1B1B]'
-            }`}
+            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-3 rounded-xl transition-all ${activeTab === 'search' ? 'text-[#E07A5F]' : 'text-[#1B1B1B]/40 hover:text-[#1B1B1B]'
+              }`}
           >
             <Search className="h-5 w-5" />
             <span className="text-[10px] font-bold tracking-wider font-satoshi uppercase">Search</span>
@@ -408,9 +439,8 @@ export function RoomPage({ code }: { code: string }) {
 
           <button
             onClick={() => setActiveTab('player')}
-            className={`relative flex flex-col items-center justify-center gap-1 py-1.5 px-4 rounded-xl transition-all ${
-              activeTab === 'player' ? 'text-[#E07A5F]' : 'text-[#1B1B1B]/40 hover:text-[#1B1B1B]'
-            }`}
+            className={`relative flex flex-col items-center justify-center gap-1 py-1.5 px-4 rounded-xl transition-all ${activeTab === 'player' ? 'text-[#E07A5F]' : 'text-[#1B1B1B]/40 hover:text-[#1B1B1B]'
+              }`}
           >
             <Music className="h-5 w-5" />
             <span className="text-[10px] font-bold tracking-wider font-satoshi uppercase">Player</span>
@@ -424,9 +454,8 @@ export function RoomPage({ code }: { code: string }) {
 
           <button
             onClick={() => setActiveTab('queue')}
-            className={`relative flex flex-col items-center justify-center gap-1 py-1.5 px-4 rounded-xl transition-all ${
-              activeTab === 'queue' ? 'text-[#E07A5F]' : 'text-[#1B1B1B]/40 hover:text-[#1B1B1B]'
-            }`}
+            className={`relative flex flex-col items-center justify-center gap-1 py-1.5 px-4 rounded-xl transition-all ${activeTab === 'queue' ? 'text-[#E07A5F]' : 'text-[#1B1B1B]/40 hover:text-[#1B1B1B]'
+              }`}
           >
             <ListMusic className="h-5 w-5" />
             <span className="text-[10px] font-bold tracking-wider font-satoshi uppercase">Queue</span>
@@ -440,9 +469,8 @@ export function RoomPage({ code }: { code: string }) {
 
           <button
             onClick={() => setActiveTab('members')}
-            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-3 rounded-xl transition-all ${
-              activeTab === 'members' ? 'text-[#E07A5F]' : 'text-[#1B1B1B]/40 hover:text-[#1B1B1B]'
-            }`}
+            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-3 rounded-xl transition-all ${activeTab === 'members' ? 'text-[#E07A5F]' : 'text-[#1B1B1B]/40 hover:text-[#1B1B1B]'
+              }`}
           >
             <Users className="h-5 w-5" />
             <span className="text-[10px] font-bold tracking-wider font-satoshi uppercase">People</span>

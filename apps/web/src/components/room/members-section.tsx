@@ -38,9 +38,8 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            className={`flex items-center justify-between rounded-xl p-2 transition-all border border-transparent ${
-              isCurrent ? 'bg-[#1B1B1B]/5' : 'hover:bg-[#1B1B1B]/4'
-            }`}
+            className={`flex items-center justify-between rounded-xl p-2 transition-all border border-transparent ${isCurrent ? 'bg-[#1B1B1B]/5' : 'hover:bg-[#1B1B1B]/4'
+              }`}
           >
             <div className="flex items-center gap-3">
               {/* DiceBear Avatar Component with deterministic seed */}
@@ -96,16 +95,16 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
         {/* Brand Logo */}
         <div className="flex items-center gap-2.5 px-2">
           {/* Custom Groove record spiral logo */}
-          <div className="relative h-6 w-6 flex items-center justify-center">
+          <div className="relative h-7 w-7 flex items-center justify-center">
             <div className="absolute inset-0 rounded-full border border-charcoal/20 flex items-center justify-center animate-spin-slow">
-              <div className="h-4.5 w-4.5 rounded-full border border-charcoal/30 flex items-center justify-center">
-                <div className="h-2.5 w-2.5 rounded-full border border-charcoal/45 flex items-center justify-center">
+              <div className="h-5 w-5 rounded-full border border-charcoal/30 flex items-center justify-center">
+                <div className="h-3 w-3 rounded-full border border-charcoal/40 flex items-center justify-center">
                   <div className="h-1 w-1 bg-charcoal rounded-full" />
                 </div>
               </div>
             </div>
           </div>
-          <span className="text-xl font-bold tracking-tight text-[#1B1B1B] font-satoshi lowercase">
+          <span className="text-xl font-bold tracking-tight text-black font-satoshi lowercase">
             vynyl
           </span>
         </div>

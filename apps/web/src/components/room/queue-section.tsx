@@ -90,16 +90,14 @@ export function QueueSection({ isMobile = false }: { isMobile?: boolean }) {
               {/* Title & Artist details */}
               <div className="min-w-0 flex-1 text-left flex flex-col items-start gap-0.5">
                 <p
-                  className={`truncate text-sm font-semibold leading-tight w-full font-satoshi ${
-                    isCurrent ? 'text-[#1B1B1B]' : 'text-[#1B1B1B]/90'
-                  }`}
+                  className="truncate text-sm font-semibold leading-tight w-full font-satoshi text-[#1B1B1B]"
                 >
                   {item.title}
                 </p>
-                <p className="truncate text-[10px] text-[#1B1B1B]/55 font-medium tracking-wide w-full font-satoshi">
+                <p className="truncate text-[10px] text-[#1B1B1B] font-medium tracking-wide w-full font-satoshi">
                   {item.artist}
                   {item.addedBy && (
-                    <span className="opacity-60">
+                    <span>
                       {' '}· Added by {getAdderName(item.addedBy)}
                     </span>
                   )}

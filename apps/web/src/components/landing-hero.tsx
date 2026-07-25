@@ -51,6 +51,16 @@ export function LandingHero() {
             queue: response.queue ?? [],
             currentIndex: response.currentIndex ?? -1,
           });
+          
+          try {
+            localStorage.setItem(
+              `vynyl_room_${response.room.code.toUpperCase()}`,
+              JSON.stringify({ memberId: response.memberId, name: response.memberName ?? displayName })
+            );
+          } catch (e) {
+            console.error(e);
+          }
+          
           router.push(`/room/${response.room.code}`);
         } else {
           router.push(
@@ -100,6 +110,16 @@ export function LandingHero() {
             queue: response.queue ?? [],
             currentIndex: response.currentIndex ?? -1,
           });
+
+          try {
+            localStorage.setItem(
+              `vynyl_room_${response.room.code.toUpperCase()}`,
+              JSON.stringify({ memberId: response.memberId, name: response.memberName ?? displayName })
+            );
+          } catch (e) {
+            console.error(e);
+          }
+
           router.push(`/room/${response.room.code}`);
         } else {
           toast({
@@ -139,7 +159,7 @@ export function LandingHero() {
                   </div>
                 </div>
               </div>
-              <span className="text-xl font-bold tracking-tight text-[#1B1B1B] font-satoshi lowercase">
+              <span className="text-xl font-bold tracking-tight text-black font-satoshi lowercase">
                 vynyl
               </span>
             </div>
