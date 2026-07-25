@@ -153,7 +153,7 @@ export function QueueSection({ isMobile = false }: { isMobile?: boolean }) {
 
   // Desktop Card View (Frosted Glass container matching the mockup)
   return (
-    <div className="rounded-3xl bg-white/45 backdrop-blur-md border border-white/60 p-5 md:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex flex-col gap-4 text-[#1B1B1B] h-full">
+    <div className="rounded-3xl bg-white/15 backdrop-blur-sm border border-white/40 p-5 md:p-6 shadow-[0_8px_32px_rgba(0,0,0,0.02)] flex flex-col gap-4 text-[#1B1B1B] h-full">
       <div className="flex items-center justify-between pb-2 border-b border-black/5">
         <h3 className="text-xs font-bold text-[#1B1B1B]/50 tracking-widest uppercase flex items-center gap-2 font-satoshi">
           Queue

@@ -29,7 +29,7 @@ export class SearchService {
   ) {}
 
   private searchKey(query: string) {
-    return `search:${query.toLowerCase().trim()}`;
+    return `search:v2:${query.toLowerCase().trim()}`;
   }
 
   private shouldIgnore(title: string): boolean {
@@ -69,6 +69,8 @@ export class SearchService {
     const url = new URL('https://www.googleapis.com/youtube/v3/search');
     url.searchParams.set('part', 'snippet');
     url.searchParams.set('type', 'video');
+    url.searchParams.set('videoEmbeddable', 'true');
+    url.searchParams.set('videoSyndicated', 'true');
     url.searchParams.set('videoCategoryId', '10');
     url.searchParams.set('maxResults', '20');
     url.searchParams.set('q', normalized);
@@ -85,7 +87,7 @@ export class SearchService {
         snippet: {
           title: string;
           channelTitle: string;
-          thumbnails: { medium?: { url: string }; default?: { url: string } };
+          thumbnails: { high?: { url: string }; medium?: { url: string }; default?: { url: string } };
         };
       }>;
     };
@@ -96,7 +98,7 @@ export class SearchService {
     if (videoIds.length === 0) return [];
 
     const detailsUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
-    detailsUrl.searchParams.set('part', 'contentDetails,snippet');
+    detailsUrl.searchParams.set('part', 'contentDetails,snippet,status');
     detailsUrl.searchParams.set('id', videoIds.join(','));
     detailsUrl.searchParams.set('key', apiKey);
 
@@ -108,9 +110,10 @@ export class SearchService {
             snippet: {
               title: string;
               channelTitle: string;
-              thumbnails: { medium?: { url: string }; default?: { url: string } };
+              thumbnails: { high?: { url: string }; medium?: { url: string }; default?: { url: string } };
             };
             contentDetails: { duration: string };
+            status?: { embeddable?: boolean };
           }>;
         })
       : { items: [] };
@@ -118,6 +121,7 @@ export class SearchService {
     const results: Array<SearchResult & { rank: number }> = [];
 
     for (const item of detailsData.items ?? []) {
+      if (item.status && item.status.embeddable === false) continue;
       const title = item.snippet.title;
       if (this.shouldIgnore(title)) continue;
 
@@ -126,9 +130,9 @@ export class SearchService {
         title,
         artist: item.snippet.channelTitle,
         thumbnail:
+          item.snippet.thumbnails.high?.url ??
           item.snippet.thumbnails.medium?.url ??
-          item.snippet.thumbnails.default?.url ??
-          '',
+          `https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`,
         duration: this.parseDuration(item.contentDetails.duration),
         rank: this.rankResult(title, item.snippet.channelTitle),
       });
@@ -144,17 +148,17 @@ export class SearchService {
   private mockSearch(query: string): SearchResult[] {
     return [
       {
-        videoId: 'dQw4w9WgXcQ',
-        title: `${query} - Official Video`,
-        artist: 'VEVO',
-        thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+        videoId: 'L_LUpnjgPso',
+        title: `${query} - Lofi Study Session`,
+        artist: 'Lofi Girl',
+        thumbnail: 'https://i.ytimg.com/vi/L_LUpnjgPso/mqdefault.jpg',
         duration: 212,
       },
       {
-        videoId: 'kJQP7kiw5Fk',
-        title: `${query} - Live Performance`,
-        artist: 'Music Topic',
-        thumbnail: 'https://i.ytimg.com/vi/kJQP7kiw5Fk/mqdefault.jpg',
+        videoId: 'jfKfPfyJRdk',
+        title: `${query} - Chill Beats Radio`,
+        artist: 'Lofi Hip Hop',
+        thumbnail: 'https://i.ytimg.com/vi/jfKfPfyJRdk/mqdefault.jpg',
         duration: 280,
       },
     ];

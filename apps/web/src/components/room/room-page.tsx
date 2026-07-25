@@ -49,7 +49,7 @@ export function RoomPage({ code }: { code: string }) {
       joinedRef.current = true;
       const roomCodeUpper = code.toUpperCase();
       const storageKey = `vynyl_room_${roomCodeUpper}`;
-      
+
       let existingMemberId = searchParams.get('memberId');
       let name = searchParams.get('name');
 
@@ -231,10 +231,10 @@ export function RoomPage({ code }: { code: string }) {
           backgroundImage: 'url(/webpage_hero.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'right 65% center',
-          filter: 'blur(20px)',
+          filter: 'blur(40px)',
         }}
       />
-      <div className="fixed inset-0 -z-15 bg-[#F6F3EE]/55 pointer-events-none" />
+      <div className="fixed inset-0 -z-15 bg-[#F6F3EE]/78 pointer-events-none" />
 
       {/* ========================================================================= */}
       {/* DESKTOP LAYOUT (Screen size >= md) */}
@@ -251,19 +251,24 @@ export function RoomPage({ code }: { code: string }) {
           <header className="flex items-center justify-between px-8 py-5 shrink-0 z-40">
             {/* Global Search Input */}
             <div className="relative w-[450px] max-w-full z-50">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1B1B1B]/40" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1B1B1B]/75" />
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Search for songs, artists, albums...  (/)"
+                placeholder="Search for songs, artists, albums..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white/45 border border-black/5 text-sm text-[#1B1B1B] placeholder-[#1B1B1B]/35 focus:outline-none focus:border-[#E07A5F] transition-all font-satoshi shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
+                className="w-full pl-10 pr-12 py-2.5 rounded-full bg-white/45 border border-black/5 text-sm text-[#1B1B1B] placeholder-[#1B1B1B]/70 focus:outline-none focus:border-[#E07A5F] transition-all font-satoshi shadow-[0_2px_12px_rgba(0,0,0,0.02)] font-medium"
               />
+              {!searchQuery && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 px-2.5 py-0.5 rounded-md border border-[#1B1B1B]/15 bg-[#1B1B1B]/5 text-xs text-[#1B1B1B]/60 select-none pointer-events-none font-satoshi">
+                  /
+                </div>
+              )}
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1B1B1B]/40 hover:text-[#1B1B1B]"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1B1B1B]/60 hover:text-[#1B1B1B]"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -357,13 +362,13 @@ export function RoomPage({ code }: { code: string }) {
                 </div>
               </div>
             </div>
-             <span className="text-xl font-bold tracking-tight text-black font-satoshi lowercase">
+            <span className="text-xl font-bold tracking-tight text-black font-satoshi lowercase">
               vynyl
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-[#EBE1D6] border border-black/5 text-[#1B1B1B]/75 font-satoshi">
+            <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-[#EBE1D6] border border-black/5 text-[#1B1B1B] font-satoshi">
               Code: {room.code}
             </span>
             <Avatar userId={memberId} name={currentUser?.name || 'User'} size="sm" />

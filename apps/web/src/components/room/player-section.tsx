@@ -169,11 +169,10 @@ export function PlayerSection() {
                     <div
                       key={i}
                       style={{ height: `${h}px` }}
-                      className={`w-[3px] rounded-full transition-all duration-300 ${
-                        isActive
-                          ? 'bg-[#E07A5F] shadow-[0_0_12px_rgba(224,122,95,0.6)]'
-                          : 'bg-[#1B1B1B]/15'
-                      }`}
+                      className={`w-[3px] rounded-full transition-all duration-300 ${isActive
+                        ? 'bg-[#E07A5F] shadow-[0_0_12px_rgba(224,122,95,0.6)]'
+                        : 'bg-[#1B1B1B]/15'
+                        }`}
                     />
                   );
                 })}
@@ -207,34 +206,38 @@ export function PlayerSection() {
 
           {/* Controls bar (Play/Pause, Prev, Next, Shuffle, Repeat) */}
           <div className="flex items-center justify-center md:justify-start gap-5 pt-1">
-            <Button
-              size="icon"
-              variant="ghost"
-              className={`h-8 w-8 rounded-full transition-colors ${
-                shuffle ? 'text-[#E07A5F]' : 'text-black hover:bg-black/5'
-              }`}
-              onClick={() => setShuffle(!shuffle)}
+            <button
+              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${isHost
+                ? 'bg-[#1B1B1B] text-white hover:bg-black'
+                : 'bg-[#1B1B1B]/15 text-[#1B1B1B]/40 cursor-not-allowed'
+                }`}
+              onClick={() => isHost && setShuffle(!shuffle)}
             >
-              <Shuffle className="h-4.5 w-4.5" />
-            </Button>
+              <Shuffle className="h-4.5 w-4.5 fill-current" />
+            </button>
 
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 rounded-full hover:bg-black/5 text-black disabled:opacity-100 transition-colors"
+            {/* Previous Button */}
+            <button
               onClick={handlePrev}
               disabled={!isHost}
+              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${isHost
+                ? 'bg-[#1B1B1B] text-white hover:bg-black'
+                : 'bg-[#1B1B1B]/15 text-[#1B1B1B]/40 cursor-not-allowed'
+                }`}
             >
-              <SkipBack className="h-4.5 w-4.5" />
-            </Button>
+              <SkipBack className="h-4.5 w-4.5 fill-current" />
+            </button>
 
-            {/* Play / Pause circular bordered button */}
+            {/* Play/Pause Button */}
             <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={isHost ? { scale: 1.04 } : {}}
+              whileTap={isHost ? { scale: 0.96 } : {}}
               onClick={togglePlay}
               disabled={!isHost}
-              className="h-14 w-14 rounded-full border border-black bg-transparent flex items-center justify-center text-black hover:bg-black hover:text-[#F6F3EE] hover:border-black transition-all shadow-md disabled:opacity-100"
+              className={`h-14 w-14 rounded-full flex items-center justify-center transition-all shadow-md ${isHost
+                ? 'bg-[#1B1B1B] text-white hover:bg-black'
+                : 'bg-[#1B1B1B]/15 text-[#1B1B1B]/40 cursor-not-allowed'
+                }`}
             >
               {localPlaying ? (
                 <Pause className="h-5 w-5 fill-current" />
@@ -243,26 +246,28 @@ export function PlayerSection() {
               )}
             </motion.button>
 
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 rounded-full hover:bg-black/5 text-black disabled:opacity-100 transition-colors"
+            {/* Next Button */}
+            <button
               onClick={skip}
               disabled={!isHost}
+              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${isHost
+                ? 'bg-[#1B1B1B] text-white hover:bg-black'
+                : 'bg-[#1B1B1B]/15 text-[#1B1B1B]/40 cursor-not-allowed'
+                }`}
             >
-              <SkipForward className="h-4.5 w-4.5" />
-            </Button>
+              <SkipForward className="h-4.5 w-4.5 fill-current" />
+            </button>
 
-            <Button
-              size="icon"
-              variant="ghost"
-              className={`h-8 w-8 rounded-full transition-colors ${
-                repeat ? 'text-[#E07A5F]' : 'text-black hover:bg-black/5'
-              }`}
+            {/* Repeat Button */}
+            <button
               onClick={() => setRepeat(!repeat)}
+              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${repeat
+                ? 'bg-[#E07A5F] text-white hover:bg-[#E07A5F]/90'
+                : 'bg-[#1B1B1B] text-white hover:bg-black'
+                }`}
             >
               <Repeat className="h-4.5 w-4.5" />
-            </Button>
+            </button>
           </div>
         </div>
       </div>
