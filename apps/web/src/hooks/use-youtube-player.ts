@@ -18,7 +18,8 @@ interface YTPlayer {
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
   getCurrentTime: () => number;
   getPlayerState: () => number;
-  loadVideoById: (videoId: string) => void;
+  loadVideoById: (videoId: string, startSeconds?: number) => void;
+  cueVideoById: (videoId: string, startSeconds?: number) => void;
   destroy: () => void;
 }
 
@@ -30,7 +31,8 @@ declare namespace YT {
     seekTo: (seconds: number, allowSeekAhead: boolean) => void;
     getCurrentTime: () => number;
     getPlayerState: () => number;
-    loadVideoById: (videoId: string) => void;
+    loadVideoById: (videoId: string, startSeconds?: number) => void;
+    cueVideoById: (videoId: string, startSeconds?: number) => void;
     destroy: () => void;
   }
   enum PlayerState {
@@ -118,16 +120,30 @@ export function useYouTubePlayer(containerId: string) {
     if (!ready || !playerRef.current || !playback?.videoId) return;
     if (lastVideoRef.current !== playback.videoId) {
       syncingRef.current = true;
-      playerRef.current.loadVideoById(playback.videoId);
+
+      let posMs = playback.positionMs;
+      if (playback.playing && playback.startedAt) {
+        posMs += (Date.now() - playback.startedAt);
+      }
+      const posSec = posMs / 1000;
+
+      if (playback.playing) {
+        playerRef.current.loadVideoById(playback.videoId, posSec);
+      } else {
+        playerRef.current.cueVideoById(playback.videoId, posSec);
+      }
+
       lastVideoRef.current = playback.videoId;
       setTimeout(() => {
         syncingRef.current = false;
       }, 1000);
     }
-  }, [ready, playback?.videoId]);
+  }, [ready, playback]);
 
   useEffect(() => {
     if (!ready || !playerRef.current || !playback) return;
+    // Guard against running sync state logic while the video is loading/cued asynchronously
+    if (lastVideoRef.current !== playback.videoId) return;
 
     syncingRef.current = true;
     

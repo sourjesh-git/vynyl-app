@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 
 export function useSocket() {
   const socketRef = useRef<AppSocket | null>(null);
+  const pendingLeavesRef = useRef<Map<string, { timeoutId: NodeJS.Timeout; memberName: string }>>(new Map());
   const {
     setSocket,
     setConnected,
@@ -41,11 +42,83 @@ export function useSocket() {
     socket.on('connect', () => setConnected(true));
     socket.on('disconnect', () => setConnected(false));
 
-    socket.on('room-state', (data) => setRoomState(data));
+    socket.on('room-state', (data) => {
+      setRoomState(data);
+      useRoomStore.getState().setInitialized(true);
+    });
     socket.on('playback-updated', (data) => setPlayback(data.playback));
-    socket.on('queue-updated', (data) => setQueue(data.items, data.currentIndex));
-    socket.on('member-joined', (data) => addMember(data.member));
-    socket.on('member-left', (data) => removeMember(data.memberId));
+    socket.on('queue-updated', (data) => {
+      const currentQueue = useRoomStore.getState().queue;
+      const isInitialized = useRoomStore.getState().initialized;
+
+      if (isInitialized && currentQueue.length > 0) {
+        const newItems = data.items.filter((newItem) => {
+          const existsInCurrent = currentQueue.some(
+            (oldItem) => oldItem.videoId === newItem.videoId && !oldItem.id.startsWith('optimistic-')
+          );
+          return !existsInCurrent;
+        });
+
+        newItems.forEach((item) => {
+          const roomState = useRoomStore.getState().room;
+          const isHost = roomState?.hostId === item.addedBy;
+          const member = roomState?.members.find((m) => m.id === item.addedBy);
+          const name = isHost ? 'Host' : (member?.name ?? 'Someone');
+          useRoomStore.getState().addEvent({
+            type: 'queue-add',
+            text: `${name} added ${item.title}`,
+          });
+        });
+      }
+
+      setQueue(data.items, data.currentIndex);
+    });
+    socket.on('member-joined', (data) => {
+      const isRejoining = pendingLeavesRef.current.has(data.member.id);
+
+      if (isRejoining) {
+        // Clear pending leave for this rejoining member to cancel the leave event log
+        clearTimeout(pendingLeavesRef.current.get(data.member.id)!.timeoutId);
+        pendingLeavesRef.current.delete(data.member.id);
+      } else {
+        const isInitialized = useRoomStore.getState().initialized;
+        const roomState = useRoomStore.getState().room;
+        const isAlreadyInRoom = roomState?.members.some((m) => m.id === data.member.id);
+
+        if (isInitialized && !isAlreadyInRoom) {
+          useRoomStore.getState().addEvent({
+            type: 'join',
+            text: `${data.member.name} joined`,
+          });
+        }
+      }
+      addMember(data.member);
+    });
+    socket.on('member-left', (data) => {
+      const isInitialized = useRoomStore.getState().initialized;
+      
+      if (isInitialized) {
+        const member = useRoomStore.getState().room?.members.find((m) => m.id === data.memberId);
+        const name = member ? member.name : 'Someone';
+
+        // Clear any existing leave timeout for this member
+        if (pendingLeavesRef.current.has(data.memberId)) {
+          clearTimeout(pendingLeavesRef.current.get(data.memberId)!.timeoutId);
+        }
+
+        // Schedule the leave event to be logged after a 2-second grace period
+        const timeoutId = setTimeout(() => {
+          useRoomStore.getState().addEvent({
+            type: 'leave',
+            text: `${name} left`,
+          });
+          pendingLeavesRef.current.delete(data.memberId);
+        }, 2000);
+
+        pendingLeavesRef.current.set(data.memberId, { timeoutId, memberName: name });
+      }
+      removeMember(data.memberId);
+    });
     socket.on('host-changed', (data) => setHost(data.hostId, data.member));
     socket.on('sync', (data) => {
       window.dispatchEvent(
@@ -60,6 +133,9 @@ export function useSocket() {
       socket.disconnect();
       setSocket(null);
       setConnected(false);
+      // Clean up all pending leave timeouts
+      pendingLeavesRef.current.forEach((val) => clearTimeout(val.timeoutId));
+      pendingLeavesRef.current.clear();
     };
   }, [
     setSocket,
@@ -88,6 +164,7 @@ export function useSocket() {
           queue: response.queue ?? [],
           currentIndex: response.currentIndex ?? -1,
         });
+        useRoomStore.getState().setInitialized(true);
 
         try {
           localStorage.setItem(

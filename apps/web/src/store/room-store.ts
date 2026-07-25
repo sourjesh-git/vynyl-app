@@ -10,6 +10,13 @@ import type { ClientToServerEvents, ServerToClientEvents } from '@syncroom/share
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
+export interface RoomEvent {
+  id: string;
+  type: 'join' | 'leave' | 'queue-add';
+  text: string;
+  timestamp: number;
+}
+
 interface RoomStore {
   socket: AppSocket | null;
   connected: boolean;
@@ -20,6 +27,8 @@ interface RoomStore {
   currentIndex: number;
   playback: PlaybackState | null;
   searchOpen: boolean;
+  events: RoomEvent[];
+  initialized: boolean;
 
   setSocket: (socket: AppSocket | null) => void;
   setConnected: (connected: boolean) => void;
@@ -38,6 +47,8 @@ interface RoomStore {
   setSearchOpen: (open: boolean) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  setInitialized: (initialized: boolean) => void;
+  addEvent: (event: Omit<RoomEvent, 'id' | 'timestamp'>) => void;
   reset: () => void;
 }
 
@@ -52,6 +63,8 @@ const initialState = {
   playback: null,
   searchOpen: false,
   searchQuery: '',
+  events: [] as RoomEvent[],
+  initialized: false,
 };
 
 export const useRoomStore = create<RoomStore>((set, get) => ({
@@ -128,6 +141,18 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
 
   setSearchOpen: (searchOpen) => set({ searchOpen }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
+  setInitialized: (initialized) => set({ initialized }),
+  addEvent: (event) =>
+    set((state) => {
+      const newEvent: RoomEvent = {
+        ...event,
+        id: Math.random().toString(36).substring(7),
+        timestamp: Date.now(),
+      };
+      return {
+        events: [newEvent, ...state.events].slice(0, 10),
+      };
+    }),
 
   reset: () => set(initialState),
 }));

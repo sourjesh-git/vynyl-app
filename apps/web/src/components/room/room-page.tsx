@@ -41,6 +41,7 @@ export function RoomPage({ code }: { code: string }) {
   const [activeTab, setActiveTab] = useState<'player' | 'queue' | 'members' | 'search'>('player');
   const [isDarkMode, setIsDarkMode] = useState(false); // default to clean light mode styles matching screenshot
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   useEffect(() => {
     if (joinedRef.current || (room?.code === code.toUpperCase() && memberId)) return;
@@ -170,17 +171,20 @@ export function RoomPage({ code }: { code: string }) {
     join();
   }, [code, room?.code, memberId, searchParams, setMember, setRoomState, router]);
 
-  // Keyboard shortcut listener to focus search bar when typing "/"
+  // Keyboard shortcut listener to focus search bar when typing "/" and Escape to blur/close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '/' && document.activeElement !== inputRef.current) {
         e.preventDefault();
         inputRef.current?.focus();
+      } else if (e.key === 'Escape' && isSearchFocused) {
+        setIsSearchFocused(false);
+        inputRef.current?.blur();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isSearchFocused]);
 
   // Listen for space key to play/pause when focus is body
   useEffect(() => {
@@ -246,18 +250,37 @@ export function RoomPage({ code }: { code: string }) {
         </aside>
 
         {/* RIGHT MAIN AREA: Core content + Header + Queue side column */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+          {/* Page Dimming Overlay */}
+          <AnimatePresence>
+            {isSearchFocused && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-[#000000]/25 backdrop-blur-[2px] z-40"
+                onClick={() => {
+                  setIsSearchFocused(false);
+                  inputRef.current?.blur();
+                }}
+              />
+            )}
+          </AnimatePresence>
+
           {/* Top Bar Header (Search, Theme switcher, Profile details) */}
-          <header className="flex items-center justify-between px-8 py-5 shrink-0 z-40">
+          <header className={`flex items-center justify-between px-8 py-5 shrink-0 transition-all duration-200 ${isSearchFocused ? 'z-50 relative' : 'z-40 relative'}`}>
             {/* Global Search Input */}
             <div className="relative w-[450px] max-w-full z-50">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1B1B1B]/75" />
               <input
                 ref={inputRef}
+                id="search-input"
                 type="text"
                 placeholder="Search for songs, artists, albums..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
                 className="w-full pl-10 pr-12 py-2.5 rounded-full bg-white/45 border border-black/5 text-sm text-[#1B1B1B] placeholder-[#1B1B1B]/70 focus:outline-none focus:border-[#E07A5F] transition-all font-satoshi shadow-[0_2px_12px_rgba(0,0,0,0.02)] font-medium"
               />
               {!searchQuery && (
@@ -276,20 +299,24 @@ export function RoomPage({ code }: { code: string }) {
 
               {/* Absolute Autocomplete Search Results Dropdown */}
               <AnimatePresence>
-                {searchQuery.trim().length >= 3 && (
+                {isSearchFocused && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute top-full left-0 w-full mt-2 rounded-3xl bg-white/95 backdrop-blur-md border border-[#EBE1D6] p-5 shadow-[0_12px_36px_rgba(0,0,0,0.08)] max-h-[380px] overflow-y-auto z-50 flex flex-col gap-3 text-[#1B1B1B]"
+                    initial={{ opacity: 0, y: -12, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -12, scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute top-full left-0 w-full mt-2 rounded-3xl bg-white/70 backdrop-blur-xl border border-white/30 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.06)] max-h-[380px] overflow-y-auto z-50 flex flex-col gap-3 text-[#1B1B1B]"
                   >
                     <div className="flex items-center justify-between pb-1.5 border-b border-black/5">
                       <span className="text-[10px] font-bold text-[#1B1B1B]/55 tracking-wider uppercase font-satoshi">
                         Search Results
                       </span>
                       <button
-                        onClick={() => setSearchQuery('')}
+                        onClick={() => {
+                          setSearchQuery('');
+                          setIsSearchFocused(false);
+                          inputRef.current?.blur();
+                        }}
                         className="text-[#1B1B1B]/50 hover:text-[#1B1B1B] p-0.5 rounded-lg hover:bg-black/5 transition-all"
                       >
                         <X className="h-3.5 w-3.5" />
@@ -302,7 +329,7 @@ export function RoomPage({ code }: { code: string }) {
             </div>
 
             {/* Profile area & theme toggle */}
-            <div className="flex items-center gap-5">
+            <div className={`flex items-center gap-5 transition-opacity duration-200 ${isSearchFocused ? 'opacity-30 pointer-events-none' : ''}`}>
               {/* Network connection badge */}
               <span className="flex items-center gap-1.5 text-xs text-[#1B1B1B]/50 bg-white/40 border border-black/5 rounded-full px-3.5 py-1 font-semibold">
                 {connected ? (

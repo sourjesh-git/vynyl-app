@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSearch } from '@/hooks/use-search';
 import { useRoomStore } from '@/store/room-store';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration, cn } from '@/lib/utils';
 import type { SearchResult } from '@syncroom/shared';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
   const searchQuery = useRoomStore((s) => s.searchQuery);
@@ -19,8 +19,48 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
   const memberId = useRoomStore((s) => s.memberId);
 
   const [addedItemIds, setAddedItemIds] = useState<Record<string, boolean>>({});
+  const [activeResultIndex, setActiveResultIndex] = useState<number>(-1);
 
   const { data: results, isLoading } = useSearch(searchQuery, true);
+
+  // Reset active keyboard index when query or results change
+  useEffect(() => {
+    setActiveResultIndex(-1);
+  }, [searchQuery, results]);
+
+  // Window event listener for keyboard arrow navigation
+  useEffect(() => {
+    if (isMobile) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.id !== 'search-input') return;
+
+      const itemsCount = results?.length ?? 0;
+      if (itemsCount === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveResultIndex((prev) => {
+          const next = prev + 1;
+          return next >= itemsCount ? 0 : next;
+        });
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveResultIndex((prev) => {
+          const next = prev - 1;
+          return next < 0 ? itemsCount - 1 : next;
+        });
+      } else if (e.key === 'Enter') {
+        if (activeResultIndex >= 0 && results?.[activeResultIndex]) {
+          e.preventDefault();
+          addToQueue(results[activeResultIndex]);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [results, activeResultIndex, isMobile]);
 
   const addToQueue = (result: SearchResult) => {
     if (!room?.code || !socket || !memberId) return;
@@ -55,7 +95,7 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
       // Pulse Skeletons styled with soft charcoal background tints
       return (
         <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
               className="flex items-center gap-3 rounded-2xl p-2 border border-black/5 bg-white/30 animate-pulse-slow"
@@ -82,15 +122,25 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
 
     return (
       <div className="space-y-2.5">
-        {results?.map((result) => {
+        {results?.map((result, idx) => {
           const isAdded = addedItemIds[result.videoId];
+          const isActive = idx === activeResultIndex;
 
           return (
             <motion.div
+              ref={(el) => {
+                if (isActive && el) {
+                  el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+              }}
               key={result.videoId}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 rounded-2xl p-2 transition-all border border-transparent hover:bg-white/20 group/search-item"
+              className={cn(
+                "flex items-center gap-3 rounded-2xl p-2 transition-all border border-transparent hover:bg-white/50 group/search-item cursor-pointer",
+                isActive && "bg-white/50"
+              )}
+              onClick={() => addToQueue(result)}
             >
               {/* Thumbnail */}
               <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-black/5 border border-black/5 shadow-sm">
@@ -99,7 +149,10 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
                     src={result.thumbnail}
                     alt={result.title}
                     fill
-                    className="object-cover scale-101"
+                    className={cn(
+                      "object-cover scale-100 transition-transform duration-300 group-hover/search-item:scale-108",
+                      isActive && "scale-108"
+                    )}
                     unoptimized
                   />
                 )}
@@ -120,12 +173,17 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
               <Button
                 size="icon"
                 variant="ghost"
-                className={`h-8 w-8 rounded-xl shrink-0 border border-transparent transition-all duration-200 ${
+                className={cn(
+                  "h-8 w-8 rounded-xl shrink-0 border border-transparent transition-all duration-200 opacity-0 group-hover/search-item:opacity-100 focus-visible:opacity-100 focus:opacity-100",
+                  isActive && "opacity-100",
                   isAdded
-                    ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-600'
-                    : 'bg-black/5 hover:bg-[#E07A5F]/20 hover:border-[#E07A5F]/30 text-[#1B1B1B]/60 hover:text-[#E07A5F]'
-                }`}
-                onClick={() => addToQueue(result)}
+                    ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-600 opacity-100"
+                    : "bg-black/5 hover:bg-[#E07A5F]/20 hover:border-[#E07A5F]/30 text-[#1B1B1B]/60 hover:text-[#E07A5F]"
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addToQueue(result);
+                }}
               >
                 <AnimatePresence mode="wait">
                   {isAdded ? (
@@ -196,7 +254,13 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
   // Desktop View (rendered inside absolute dropdown card in room-page header)
   return (
     <div className="flex flex-col gap-1 text-[#1B1B1B]">
-      {renderSearchResults()}
+      {searchQuery.trim().length >= 3 ? (
+        renderSearchResults()
+      ) : (
+        <p className="text-xs text-[#1B1B1B]/40 text-center py-6 font-medium font-satoshi">
+          Type 3 or more characters to find tracks
+        </p>
+      )}
     </div>
   );
 }
