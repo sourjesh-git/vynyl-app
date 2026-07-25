@@ -1,0 +1,19 @@
+{
+  "name": "syncroom",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @syncroom/server\" \"npm run dev -w @syncroom/web\"",
+    "dev:server": "npm run dev -w @syncroom/server",
+    "dev:web": "npm run dev -w @syncroom/web",
+    "build": "npm run build -w @syncroom/shared && npm run build -w @syncroom/server && npm run build -w @syncroom/web",
+    "build:shared": "npm run build -w @syncroom/shared"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  }
+}
