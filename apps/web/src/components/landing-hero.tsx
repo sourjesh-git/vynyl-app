@@ -172,9 +172,9 @@ export function LandingHero() {
           </div>
 
           {/* Core copy & Interactive Controls */}
-          <div className="space-y-8 my-auto max-w-lg">
+          <div className="space-y-5 mt-8 md:mt-12 mb-auto max-w-lg">
             {/* Header text */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#1B1B1B] font-canela leading-[1.15]">
                 Listen to music,
                 <br />
@@ -184,13 +184,13 @@ export function LandingHero() {
                   <span className="absolute -bottom-2.5 left-0 right-0 h-1.5 bg-[#E07A5F] opacity-75 rounded-full" />
                 </span>
               </h1>
-              <p className="text-sm sm:text-base text-[#1B1B1B]/75 leading-relaxed font-satoshi pt-3">
+              <p className="text-sm sm:text-base text-[#1B1B1B]/75 leading-relaxed font-satoshi pt-1">
                 Create a room, invite your people, and jam in real time.
               </p>
             </div>
 
             {/* Action forms container */}
-            <div className="pt-2">
+            <div className="pt-1">
               <AnimatePresence mode="wait">
                 {actionType === null ? (
                   /* Initial landing view: Create a room / Join a room buttons */
@@ -226,9 +226,9 @@ export function LandingHero() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -15 }}
-                    className="space-y-4 bg-[#EBE1D6]/40 p-5 rounded-2xl border border-[#EBE1D6] max-w-md shadow-[0_4px_24px_rgba(0,0,0,0.03)]"
+                    className="space-y-3 bg-[#EBE1D6]/40 p-4 rounded-2xl border border-[#EBE1D6] max-w-md shadow-[0_4px_24px_rgba(0,0,0,0.03)]"
                   >
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       {/* 1. Name Input Field */}
                       <div className="space-y-1 text-left">
                         <label className="text-[10px] font-bold text-[#1B1B1B]/50 tracking-wider uppercase pl-1">
@@ -239,7 +239,7 @@ export function LandingHero() {
                           placeholder="Your name (optional)"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl bg-white border border-[#EBE1D6] text-sm text-[#1B1B1B] placeholder-[#1B1B1B]/40 focus:outline-none focus:border-[#8FB3A6] transition-all"
+                          className="w-full px-4 py-2 rounded-xl bg-white border border-[#EBE1D6] text-sm text-[#1B1B1B] placeholder-[#1B1B1B]/40 focus:outline-none focus:border-[#8FB3A6] transition-all"
                           maxLength={32}
                           autoFocus
                         />
@@ -257,18 +257,18 @@ export function LandingHero() {
                             value={joinCode}
                             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                             maxLength={6}
-                            className="w-full px-4 py-3 rounded-xl bg-white border border-[#EBE1D6] text-sm text-[#1B1B1B] font-semibold placeholder-[#1B1B1B]/40 tracking-wider uppercase focus:outline-none focus:border-[#8FB3A6] transition-all"
+                            className="w-full px-4 py-2 rounded-xl bg-white border border-[#EBE1D6] text-sm text-[#1B1B1B] font-semibold placeholder-[#1B1B1B]/40 tracking-wider uppercase focus:outline-none focus:border-[#8FB3A6] transition-all"
                           />
                         </div>
                       )}
                     </div>
 
                     {/* Form control action buttons */}
-                    <div className="flex items-center gap-2 pt-1.5">
+                    <div className="flex items-center gap-2 pt-0.5">
                       <Button
                         onClick={actionType === 'create' ? handleCreateRoom : handleJoinRoom}
                         disabled={loading}
-                        className="flex-1 py-5 rounded-xl bg-[#1B1B1B] hover:bg-[#1B1B1B]/90 text-white font-semibold flex items-center justify-center gap-2 shadow-md transition-all hover:-translate-y-[2px]"
+                        className="flex-1 py-3.5 rounded-xl bg-[#1B1B1B] hover:bg-[#1B1B1B]/90 text-white font-semibold flex items-center justify-center gap-2 shadow-md transition-all hover:-translate-y-[2px]"
                       >
                         {loading ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -286,7 +286,7 @@ export function LandingHero() {
                           setJoinCode('');
                         }}
                         disabled={loading}
-                        className="py-5 px-4 rounded-xl bg-transparent hover:bg-black/5 text-[#1B1B1B]/60 hover:text-[#1B1B1B] font-medium transition-all"
+                        className="py-3.5 px-4 rounded-xl bg-transparent hover:bg-black/5 text-[#1B1B1B]/60 hover:text-[#1B1B1B] font-medium transition-all"
                       >
                         Cancel
                       </Button>

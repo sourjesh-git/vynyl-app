@@ -183,20 +183,30 @@ export function useYouTubePlayer(containerId: string) {
   }, [isHost, ready]);
 
   const play = useCallback(() => {
-    if (!isHost || !room?.code || !playerRef.current) return;
+    if (!isHost || !room?.code) return;
+    const currentPlayback = useRoomStore.getState().playback;
+    const pos = currentPlayback ? currentPlayback.positionMs : 0;
     socket?.emit('play', {
       code: room.code,
-      positionMs: getPositionMs(),
+      positionMs: pos,
     });
-  }, [isHost, room?.code, socket, getPositionMs]);
+  }, [isHost, room?.code, socket]);
 
   const pause = useCallback(() => {
-    if (!isHost || !room?.code || !playerRef.current) return;
+    if (!isHost || !room?.code) return;
+    const currentPlayback = useRoomStore.getState().playback;
+    if (!currentPlayback) return;
+    
+    let pos = currentPlayback.positionMs;
+    if (currentPlayback.playing && currentPlayback.startedAt) {
+      pos += (Date.now() - currentPlayback.startedAt);
+    }
+    
     socket?.emit('pause', {
       code: room.code,
-      positionMs: getPositionMs(),
+      positionMs: pos,
     });
-  }, [isHost, room?.code, socket, getPositionMs]);
+  }, [isHost, room?.code, socket]);
 
   const seek = useCallback(
     (positionMs: number) => {

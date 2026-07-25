@@ -49,17 +49,21 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
               </div>
               <div className="text-sm font-medium text-[#1B1B1B] flex items-center gap-1.5 font-satoshi">
                 <span>{member.name}</span>
-                {isCurrent && (
-                  <span className="text-xs text-[#1B1B1B]/40 font-normal">(You)</span>
-                )}
               </div>
             </div>
 
-            {isHost && (
-              <span className="rounded-full bg-[#C7D1C0] px-2.5 py-0.5 text-[9px] font-bold text-[#1B1B1B] tracking-wider uppercase">
-                Host
-              </span>
-            )}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {isHost && (
+                <span className="rounded-full bg-[#C7D1C0] px-2.5 py-0.5 text-[9px] font-bold text-[#1B1B1B] tracking-wider uppercase">
+                  Host
+                </span>
+              )}
+              {isCurrent && (
+                <span className="rounded-full bg-black/5 border border-black/5 px-2.5 py-0.5 text-[9px] font-bold text-[#1B1B1B] tracking-wider uppercase">
+                  You
+                </span>
+              )}
+            </div>
           </motion.div>
         );
       })}

@@ -26,6 +26,7 @@ export function useSocket() {
     memberId,
     connected,
     memberName,
+    setMember,
   } = useRoomStore();
 
   useEffect(() => {
@@ -80,15 +81,25 @@ export function useSocket() {
       name: memberName ?? 'Guest',
       memberId: memberId,
     }, (response) => {
-      if (response?.success && response.room) {
+      if (response?.success && response.room && response.memberId) {
+        setMember(response.memberId, response.memberName ?? memberName ?? 'Guest');
         setRoomState({
           room: response.room,
           queue: response.queue ?? [],
           currentIndex: response.currentIndex ?? -1,
         });
+
+        try {
+          localStorage.setItem(
+            `vynyl_room_${room.code.toUpperCase()}`,
+            JSON.stringify({ memberId: response.memberId, name: response.memberName ?? memberName })
+          );
+        } catch (e) {
+          console.error(e);
+        }
       }
     });
-  }, [connected, room?.code, memberId, memberName, setRoomState]);
+  }, [connected, room?.code, memberId, memberName, setRoomState, setMember]);
 
   useEffect(() => {
     if (!room?.code || !memberId) return;

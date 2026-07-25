@@ -199,7 +199,7 @@ export function PlayerSection() {
             </div>
 
             {/* Time labels below waveform */}
-            <div className="flex justify-between text-xs font-semibold text-white/45 tracking-wider font-satoshi">
+            <div className="flex justify-between text-xs font-semibold text-[#1B1B1B]/45 tracking-wider font-satoshi">
               <span>{formatDuration(progress)}</span>
               <span>{formatDuration(duration)}</span>
             </div>
@@ -211,7 +211,7 @@ export function PlayerSection() {
               size="icon"
               variant="ghost"
               className={`h-8 w-8 rounded-full transition-colors ${
-                shuffle ? 'text-[#E07A5F]' : 'text-white/60 hover:text-white hover:bg-white/5'
+                shuffle ? 'text-[#E07A5F]' : 'text-black hover:bg-black/5'
               }`}
               onClick={() => setShuffle(!shuffle)}
             >
@@ -221,7 +221,7 @@ export function PlayerSection() {
             <Button
               size="icon"
               variant="ghost"
-              className="h-8 w-8 rounded-full hover:bg-white/5 text-white/80 hover:text-white transition-colors"
+              className="h-8 w-8 rounded-full hover:bg-black/5 text-black disabled:opacity-100 transition-colors"
               onClick={handlePrev}
               disabled={!isHost}
             >
@@ -234,7 +234,7 @@ export function PlayerSection() {
               whileTap={{ scale: 0.96 }}
               onClick={togglePlay}
               disabled={!isHost}
-              className="h-14 w-14 rounded-full border border-white/30 bg-transparent flex items-center justify-center text-white hover:bg-white hover:text-[#1B1B1B] hover:border-white transition-all shadow-md disabled:opacity-50"
+              className="h-14 w-14 rounded-full border border-black bg-transparent flex items-center justify-center text-black hover:bg-black hover:text-[#F6F3EE] hover:border-black transition-all shadow-md disabled:opacity-100"
             >
               {localPlaying ? (
                 <Pause className="h-5 w-5 fill-current" />
@@ -246,7 +246,7 @@ export function PlayerSection() {
             <Button
               size="icon"
               variant="ghost"
-              className="h-8 w-8 rounded-full hover:bg-white/5 text-white/80 hover:text-white transition-colors"
+              className="h-8 w-8 rounded-full hover:bg-black/5 text-black disabled:opacity-100 transition-colors"
               onClick={skip}
               disabled={!isHost}
             >
@@ -257,7 +257,7 @@ export function PlayerSection() {
               size="icon"
               variant="ghost"
               className={`h-8 w-8 rounded-full transition-colors ${
-                repeat ? 'text-[#E07A5F]' : 'text-white/60 hover:text-white hover:bg-white/5'
+                repeat ? 'text-[#E07A5F]' : 'text-black hover:bg-black/5'
               }`}
               onClick={() => setRepeat(!repeat)}
             >
@@ -272,7 +272,7 @@ export function PlayerSection() {
         <Button
           size="icon"
           variant="ghost"
-          className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/5 rounded-lg shrink-0"
+          className="h-8 w-8 text-[#1B1B1B]/60 hover:text-[#1B1B1B] hover:bg-black/5 rounded-lg shrink-0"
           onClick={() => setMuted(!muted)}
         >
           {muted || volume === 0 ? (
@@ -282,7 +282,7 @@ export function PlayerSection() {
           )}
         </Button>
         <div className="relative flex-1 h-6">
-          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-white/15" />
+          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#1B1B1B]/15" />
           <div
             className="absolute left-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#E07A5F] shadow-[0_0_8px_rgba(224,122,95,0.4)]"
             style={{ width: `${muted ? 0 : volume}%` }}

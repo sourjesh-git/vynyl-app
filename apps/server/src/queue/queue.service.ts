@@ -34,7 +34,7 @@ export class QueueService {
     };
     state.items.push(newItem);
     if (state.currentIndex === -1) {
-      state.currentIndex = 0;
+      state.currentIndex = state.items.length - 1;
     }
     await this.saveQueue(code, state);
     return state;
@@ -105,7 +105,6 @@ export class QueueService {
       state.currentIndex += 1;
     } else {
       state.currentIndex = -1;
-      state.items = [];
     }
 
     await this.saveQueue(code, state);
