@@ -7,6 +7,7 @@ import { SearchModule } from './search/search.module';
 import { SyncModule } from './sync/sync.module';
 import { PresenceModule } from './presence/presence.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -19,5 +20,6 @@ import { GatewayModule } from './gateway/gateway.module';
     PresenceModule,
     GatewayModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

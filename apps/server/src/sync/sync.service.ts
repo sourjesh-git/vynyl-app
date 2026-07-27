@@ -20,6 +20,7 @@ export class SyncService {
       playing: true,
       positionMs: 0,
       startedAt: Date.now(),
+      addedBy: item.addedBy,
     };
     await this.roomService.saveRoom(room);
     return room.playback;
@@ -78,6 +79,7 @@ export class SyncService {
       playing: false,
       positionMs: 0,
       startedAt: null,
+      addedBy: null,
     };
     await this.roomService.saveRoom(room);
     return room.playback;

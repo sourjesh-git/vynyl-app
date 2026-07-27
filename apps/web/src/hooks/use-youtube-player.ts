@@ -20,6 +20,7 @@ interface YTPlayer {
   getPlayerState: () => number;
   loadVideoById: (videoId: string, startSeconds?: number) => void;
   cueVideoById: (videoId: string, startSeconds?: number) => void;
+  setVolume: (volume: number) => void;
   destroy: () => void;
 }
 
@@ -33,6 +34,7 @@ declare namespace YT {
     getPlayerState: () => number;
     loadVideoById: (videoId: string, startSeconds?: number) => void;
     cueVideoById: (videoId: string, startSeconds?: number) => void;
+    setVolume: (volume: number) => void;
     destroy: () => void;
   }
   enum PlayerState {

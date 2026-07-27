@@ -22,6 +22,7 @@ const emptyPlayback = (): PlaybackState => ({
   playing: false,
   positionMs: 0,
   startedAt: null,
+  addedBy: null,
 });
 
 @Injectable()

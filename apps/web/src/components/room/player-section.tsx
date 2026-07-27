@@ -148,11 +148,11 @@ export function PlayerSection() {
             <span className="text-[10px] font-bold text-[#E07A5F] tracking-widest uppercase">
               Now playing
             </span>
-            <h2 className="text-2xl sm:text-3.5xl font-bold tracking-tight text-[#FFFFF0] leading-tight font-canela drop-shadow-sm">
+            <h2 className="text-2xl sm:text-3.5xl font-bold tracking-tight text-[#1B1B1B] leading-tight font-canela drop-shadow-sm">
               {playback.title}
             </h2>
-            <p className="text-base text-[#FFFFF0] font-semibold font-satoshi">{playback.artist}</p>
-            <p className="text-[11px] text-[#FFFFF0] mt-1 font-satoshi font-medium tracking-wide">
+            <p className="text-base text-[#1B1B1B]/80 font-semibold font-satoshi">{playback.artist}</p>
+            <p className="text-[11px] text-[#1B1B1B]/55 mt-1 font-satoshi font-medium tracking-wide">
               Added by {addedByName}
             </p>
           </div>
@@ -170,8 +170,8 @@ export function PlayerSection() {
                       key={i}
                       style={{ height: `${h}px` }}
                       className={`w-[3px] rounded-full transition-all duration-300 ${isActive
-                        ? 'bg-[#1B1B1B]/50 shadow-[0_0_12px_rgba(224,122,95,0.6)]'
-                        : 'bg-[#FFFFF0]/50'
+                        ? 'bg-[#E07A5F] shadow-[0_0_12px_rgba(224,122,95,0.4)]'
+                        : 'bg-[#1B1B1B]/15'
                         }`}
                     />
                   );
@@ -272,36 +272,33 @@ export function PlayerSection() {
         </div>
       </div>
 
-      {/* Volume slider at the very bottom */}
-      <div className="flex items-center gap-2.5 max-w-[200px] mt-2 group/volume mx-auto md:mx-0">
+      {/* Rebuilt Premium Volume Slider */}
+      <div className="flex items-center gap-3.5 max-w-[220px] mt-4 group/volume mx-auto md:mx-0">
         <Button
           size="icon"
-          variant="ghost"
-          className="h-8 w-8 text-[#1B1B1B]/60 hover:text-[#1B1B1B] hover:bg-black/5 rounded-lg shrink-0"
+          className="h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm bg-[#1B1B1B] text-white hover:bg-black shrink-0"
           onClick={() => setMuted(!muted)}
         >
           {muted || volume === 0 ? (
-            <VolumeX className="h-4 w-4" />
+            <VolumeX className="h-4.5 w-4.5" />
           ) : (
-            <Volume2 className="h-4 w-4" />
+            <Volume2 className="h-4.5 w-4.5" />
           )}
         </Button>
-        <div className="relative flex-1 h-6">
-          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#1B1B1B]/15" />
-          <div
-            className="absolute left-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#E07A5F] shadow-[0_0_8px_rgba(224,122,95,0.4)]"
-            style={{ width: `${muted ? 0 : volume}%` }}
-          />
+        <div className="relative flex-1 flex items-center h-6">
           <input
             type="range"
             min={0}
             max={100}
-            value={volume}
+            value={muted ? 0 : volume}
             onChange={(e) => {
               setVolume(parseInt(e.target.value));
               setMuted(false);
             }}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, #E07A5F ${muted ? 0 : volume}%, rgba(224, 122, 95, 0.2) ${muted ? 0 : volume}%)`
+            }}
+            className="w-full h-1 rounded-full appearance-none cursor-pointer outline-none accent-[#E07A5F] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#E07A5F] [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:duration-150 [&::-webkit-slider-thumb]:hover:scale-125 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#E07A5F] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:hover:scale-125"
           />
         </div>
       </div>

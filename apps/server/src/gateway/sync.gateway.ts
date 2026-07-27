@@ -7,6 +7,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import {
   ClientToServerEvents,
@@ -38,6 +39,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server<ClientToServerEvents, ServerToClientEvents>;
 
+  private readonly logger = new Logger(SyncGateway.name);
   private readonly socketMembers = new Map<string, { code: string; memberId: string }>();
 
   constructor(
@@ -47,10 +49,13 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly presenceService: PresenceService,
   ) {}
 
-  handleConnection(_client: AppSocket) {}
+  handleConnection(client: AppSocket) {
+    this.logger.log(`Client connected: ${client.id}`);
+  }
 
   async handleDisconnect(client: AppSocket) {
     const info = this.socketMembers.get(client.id);
+    this.logger.log(`Client disconnected: ${client.id}${info ? ` (was in room ${info.code})` : ''}`);
     if (!info) return;
 
     const { code, memberId } = info;
@@ -61,18 +66,22 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const wasHost = room.hostId === memberId;
     if (wasHost) {
+      this.logger.log(`Host ${memberId} disconnected from room ${code}. Starting grace period timeout...`);
       this.roomService.startHostDisconnectTimeout(code, memberId, async () => {
         const currentRoom = await this.roomService.getRoom(code).catch(() => null);
         if (!currentRoom || currentRoom.hostId !== memberId) return;
 
+        this.logger.log(`Host grace period expired. Removing host and transferring role in room ${code}`);
         const updated = await this.roomService.removeMember(code, memberId);
         if (!updated) {
+          this.logger.log(`Room ${code} closed (no members left)`);
           this.server.to(code).emit('error', { message: 'Room closed' });
           return;
         }
 
         const newHost = updated.members.find((m) => m.isHost);
         if (newHost) {
+          this.logger.log(`Room ${code}: Host role transferred to ${newHost.name} (${newHost.id})`);
           this.server.to(code).emit('host-changed', {
             hostId: newHost.id,
             member: newHost,
@@ -81,10 +90,13 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.to(code).emit('member-left', { memberId });
       });
     } else {
+      this.logger.log(`Member ${memberId} disconnected from room ${code}`);
       const updated = await this.roomService.removeMember(code, memberId);
       await this.presenceService.removeMember(code, memberId);
       this.server.to(code).emit('member-left', { memberId });
-      if (!updated) return;
+      if (!updated) {
+        this.logger.log(`Room ${code} closed (no members left)`);
+      }
     }
   }
 
@@ -94,7 +106,10 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { name: string },
   ): Promise<JoinRoomAck> {
     try {
+      this.logger.log(`Creating room for user "${data.name}"`);
       const result = await this.roomService.createRoom(data.name);
+      this.logger.log(`Room created: ${result.code} by host ${result.memberId}`);
+
       await this.joinSocketToRoom(client, result.code, result.memberId);
       const room = await this.roomService.getRoom(result.code);
       const queueState = await this.queueService.getQueue(result.code);
@@ -114,6 +129,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
         currentIndex: queueState.currentIndex,
       };
     } catch (err) {
+      this.logger.error(`Failed to create room: ${err instanceof Error ? err.message : err}`);
       return { success: false, error: 'Failed to create room' };
     }
   }
@@ -125,6 +141,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ): Promise<JoinRoomAck> {
     try {
       const code = data.code.toUpperCase();
+      this.logger.log(`User "${data.name}" attempting to join room ${code} (existingId: ${data.memberId})`);
       const result = await this.roomService.joinRoom(code, data.name, data.memberId);
       await this.joinSocketToRoom(client, code, result.memberId);
 
@@ -145,6 +162,8 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
         member: result.room.members.find((m) => m.id === result.memberId)!,
       });
 
+      this.logger.log(`User "${data.name}" joined room ${code} successfully (memberId: ${result.memberId})`);
+
       return {
         success: true,
         room: result.room,
@@ -154,6 +173,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
         currentIndex: queueState.currentIndex,
       };
     } catch (err) {
+      this.logger.warn(`Failed to join room ${data.code}: ${err instanceof Error ? err.message : err}`);
       return { success: false, error: 'Room not found' };
     }
   }
@@ -167,6 +187,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const info = this.socketMembers.get(client.id);
     if (!info) return;
 
+    this.logger.log(`Member ${info.memberId} explicitly left room ${code}`);
     await this.roomService.removeMember(code, info.memberId);
     await this.presenceService.removeMember(code, info.memberId);
     client.leave(code);
@@ -181,6 +202,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!(await this.assertHost(client, data.code))) return;
 
+    this.logger.log(`Room ${data.code.toUpperCase()}: Loading track "${data.item.title}"`);
     await this.queueService.setCurrentFromItem(data.code, data.item);
     const playback = await this.syncService.loadTrack(data.code, data.item);
     const queueState = await this.queueService.getQueue(data.code);
@@ -198,6 +220,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { code: string; positionMs?: number },
   ) {
     if (!(await this.assertHost(client, data.code))) return;
+    this.logger.log(`Room ${data.code.toUpperCase()}: Play requested at position ${data.positionMs ?? 'current'}ms`);
     const playback = await this.syncService.play(data.code, data.positionMs);
     this.broadcastPlayback(data.code, playback);
   }
@@ -208,6 +231,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { code: string; positionMs?: number },
   ) {
     if (!(await this.assertHost(client, data.code))) return;
+    this.logger.log(`Room ${data.code.toUpperCase()}: Pause requested at position ${data.positionMs ?? 'current'}ms`);
     const playback = await this.syncService.pause(data.code, data.positionMs);
     this.broadcastPlayback(data.code, playback);
   }
@@ -218,6 +242,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { code: string; positionMs: number },
   ) {
     if (!(await this.assertHost(client, data.code))) return;
+    this.logger.log(`Room ${data.code.toUpperCase()}: Seek requested to ${data.positionMs}ms`);
     const playback = await this.syncService.seek(data.code, data.positionMs);
     this.broadcastPlayback(data.code, playback);
   }
@@ -229,6 +254,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!(await this.assertHost(client, data.code))) return;
 
+    this.logger.log(`Room ${data.code.toUpperCase()}: Advancing to next track`);
     const { state, item } = await this.queueService.advanceQueue(data.code);
     this.server.to(data.code.toUpperCase()).emit('queue-updated', {
       items: state.items,
@@ -236,11 +262,36 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
     if (item) {
+      this.logger.log(`Room ${data.code.toUpperCase()}: Next track is "${item.title}"`);
       const playback = await this.syncService.loadTrack(data.code, item);
       this.broadcastPlayback(data.code, playback);
     } else {
+      this.logger.log(`Room ${data.code.toUpperCase()}: Queue empty, stopping playback`);
       const playback = await this.syncService.stop(data.code);
       this.broadcastPlayback(data.code, playback);
+    }
+  }
+
+  @SubscribeMessage('playback-prev')
+  async handlePlaybackPrev(
+    @ConnectedSocket() client: AppSocket,
+    @MessageBody() data: { code: string },
+  ) {
+    if (!(await this.assertHost(client, data.code))) return;
+
+    this.logger.log(`Room ${data.code.toUpperCase()}: Going back to previous track`);
+    const { state, item } = await this.queueService.regressQueue(data.code);
+    this.server.to(data.code.toUpperCase()).emit('queue-updated', {
+      items: state.items,
+      currentIndex: state.currentIndex,
+    });
+
+    if (item) {
+      this.logger.log(`Room ${data.code.toUpperCase()}: Previous track is "${item.title}"`);
+      const playback = await this.syncService.loadTrack(data.code, item);
+      this.broadcastPlayback(data.code, playback);
+    } else {
+      this.logger.log(`Room ${data.code.toUpperCase()}: No previous track available`);
     }
   }
 
@@ -253,6 +304,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const info = this.socketMembers.get(client.id);
     if (!info) return;
 
+    this.logger.log(`Room ${data.code.toUpperCase()}: Member ${info.memberId} adding track "${data.item.title}" to queue`);
     const item = {
       ...data.item,
       addedBy: info.memberId,
@@ -264,6 +316,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!room.playback.videoId && state.currentIndex >= 0) {
       const current = state.items[state.currentIndex];
       if (current && (await this.assertHost(client, data.code))) {
+        this.logger.log(`Room ${data.code.toUpperCase()}: Queue was empty, loading added track automatically`);
         const playback = await this.syncService.loadTrack(data.code, current);
         this.broadcastPlayback(data.code, playback);
       }
@@ -281,6 +334,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { code: string; itemId: string },
   ) {
     if (!(await this.assertHost(client, data.code))) return;
+    this.logger.log(`Room ${data.code.toUpperCase()}: Removing item ${data.itemId} from queue`);
     const state = await this.queueService.removeItem(data.code, data.itemId);
     this.server.to(data.code.toUpperCase()).emit('queue-updated', {
       items: state.items,
@@ -294,6 +348,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { code: string; fromIndex: number; toIndex: number },
   ) {
     if (!(await this.assertHost(client, data.code))) return;
+    this.logger.log(`Room ${data.code.toUpperCase()}: Reordering queue from ${data.fromIndex} to ${data.toIndex}`);
     const state = await this.queueService.reorderItem(
       data.code,
       data.fromIndex,
@@ -344,12 +399,14 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private async assertHost(client: AppSocket, code: string): Promise<boolean> {
     const info = this.socketMembers.get(client.id);
     if (!info) {
+      this.logger.warn(`Host assertion failed: client ${client.id} is not associated with any room`);
       client.emit('error', { message: 'Not in a room' });
       return false;
     }
 
     const room = await this.roomService.getRoom(code).catch(() => null);
     if (!room || !this.roomService.isHost(room, info.memberId)) {
+      this.logger.warn(`Host assertion failed for member ${info.memberId} in room ${code}`);
       client.emit('error', { message: 'Only the host can control playback' });
       return false;
     }

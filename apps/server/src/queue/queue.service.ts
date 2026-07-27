@@ -112,6 +112,23 @@ export class QueueService {
     return { state, item };
   }
 
+  async regressQueue(code: string): Promise<{ state: QueueState; item: QueueItem | null }> {
+    const state = await this.getQueue(code);
+    if (state.items.length === 0) {
+      return { state, item: null };
+    }
+
+    if (state.currentIndex > 0) {
+      state.currentIndex -= 1;
+    } else {
+      state.currentIndex = 0;
+    }
+
+    await this.saveQueue(code, state);
+    const item = this.getCurrentItem(state);
+    return { state, item };
+  }
+
   async setCurrentFromItem(code: string, item: QueueItem): Promise<QueueState> {
     const state = await this.getQueue(code);
     const existingIndex = state.items.findIndex((i) => i.id === item.id);

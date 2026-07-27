@@ -158,13 +158,21 @@ export function RoomPage({ code }: { code: string }) {
         if (socket?.connected) {
           socket.emit('join-room', { code, name, memberId: result.memberId }, () => { });
         }
-      } catch {
+      } catch (err) {
+        const errMessage = err instanceof Error ? err.message : '';
+        const isNetworkError = errMessage.toLowerCase().includes('failed to fetch') || errMessage.toLowerCase().includes('networkerror');
+        
         toast({
-          title: 'Room not found',
-          description: 'This room may have expired.',
+          title: isNetworkError ? 'Connection Error' : 'Room not found',
+          description: isNetworkError
+            ? 'Could not connect to the server. It may be spinning up (Render free tier can take up to 60 seconds to wake up).'
+            : 'This room may have expired.',
           variant: 'destructive',
         });
-        router.push('/');
+        
+        if (!isNetworkError) {
+          router.push('/');
+        }
       }
     };
 

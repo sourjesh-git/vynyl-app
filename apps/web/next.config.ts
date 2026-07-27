@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.ytimg.com' },
     ],
   },
+  transpilePackages: ['@syncroom/shared'],
 };
 
 export default nextConfig;

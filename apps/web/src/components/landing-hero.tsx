@@ -70,10 +70,14 @@ export function LandingHero() {
           );
         }
       });
-    } catch {
+    } catch (err) {
+      const errMessage = err instanceof Error ? err.message : '';
+      const isNetworkError = errMessage.toLowerCase().includes('failed to fetch') || errMessage.toLowerCase().includes('networkerror');
       toast({
-        title: 'Failed to create room',
-        description: 'Please try again.',
+        title: isNetworkError ? 'Server Spin-up In Progress' : 'Failed to create room',
+        description: isNetworkError
+          ? 'The server is waking up (Render free tier can take up to 60 seconds to spin up). Please wait a moment and try again.'
+          : 'Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -130,10 +134,14 @@ export function LandingHero() {
         }
         setLoading(false);
       });
-    } catch {
+    } catch (err) {
+      const errMessage = err instanceof Error ? err.message : '';
+      const isNetworkError = errMessage.toLowerCase().includes('failed to fetch') || errMessage.toLowerCase().includes('networkerror');
       toast({
-        title: 'Failed to join',
-        description: 'Please try again.',
+        title: isNetworkError ? 'Server Spin-up In Progress' : 'Failed to join',
+        description: isNetworkError
+          ? 'The server is waking up (Render free tier can take up to 60 seconds to spin up). Please wait a moment and try again.'
+          : 'Please try again.',
         variant: 'destructive',
       });
       setLoading(false);

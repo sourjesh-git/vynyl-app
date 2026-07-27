@@ -18,6 +18,7 @@ export interface ClientToServerEvents {
   pause: (data: { code: string; positionMs?: number }) => void;
   seek: (data: { code: string; positionMs: number }) => void;
   'next-track': (data: { code: string }) => void;
+  'playback-prev': (data: { code: string }) => void;
   'queue-add': (data: { code: string; item: Omit<QueueItem, 'id' | 'addedAt'> }) => void;
   'queue-remove': (data: { code: string; itemId: string }) => void;
   'queue-reorder': (data: { code: string; fromIndex: number; toIndex: number }) => void;

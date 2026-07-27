@@ -16,6 +16,7 @@ export interface PlaybackState {
   playing: boolean;
   positionMs: number;
   startedAt: number | null;
+  addedBy: string | null;
 }
 
 export interface Room {
