@@ -148,11 +148,11 @@ export function PlayerSection() {
             <span className="text-[10px] font-bold text-[#E07A5F] tracking-widest uppercase">
               Now playing
             </span>
-            <h2 className="text-2xl sm:text-3.5xl font-bold tracking-tight text-[#1B1B1B] leading-tight font-canela drop-shadow-sm">
+            <h2 className="text-2xl sm:text-3.5xl font-bold tracking-tight text-[#FFFFF0] leading-tight font-canela drop-shadow-sm">
               {playback.title}
             </h2>
-            <p className="text-base text-[#1B1B1B]/80 font-semibold font-satoshi">{playback.artist}</p>
-            <p className="text-[11px] text-[#1B1B1B]/55 mt-1 font-satoshi font-medium tracking-wide">
+            <p className="text-base text-[#FFFFF0] font-semibold font-satoshi">{playback.artist}</p>
+            <p className="text-[11px] text[#FFFFF0] mt-1 font-satoshi font-medium tracking-wide">
               Added by {addedByName}
             </p>
           </div>
@@ -171,7 +171,7 @@ export function PlayerSection() {
                       style={{ height: `${h}px` }}
                       className={`w-[3px] rounded-full transition-all duration-300 ${isActive
                         ? 'bg-[#E07A5F] shadow-[0_0_12px_rgba(224,122,95,0.4)]'
-                        : 'bg-[#1B1B1B]/15'
+                        : 'bg-[#FFFFF0]'
                         }`}
                     />
                   );
