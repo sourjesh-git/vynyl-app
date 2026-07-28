@@ -134,7 +134,12 @@ export function useYouTubePlayer(containerId: string) {
       const estimatedServerTime = Date.now() - clockOffset;
       let posMs = playback.positionMs;
       if (playback.playing && playback.startedAt) {
-        posMs += (estimatedServerTime - playback.startedAt);
+        const elapsed = estimatedServerTime - playback.startedAt;
+        if (playback.positionMs === 0 && elapsed < 5000) {
+          posMs = 0;
+        } else {
+          posMs += elapsed;
+        }
       }
       const posSec = posMs / 1000;
 
@@ -161,7 +166,12 @@ export function useYouTubePlayer(containerId: string) {
     const estimatedServerTime = Date.now() - clockOffset;
     let posMs = playback.positionMs;
     if (playback.playing && playback.startedAt) {
-      posMs += (estimatedServerTime - playback.startedAt);
+      const elapsed = estimatedServerTime - playback.startedAt;
+      if (playback.positionMs === 0 && elapsed < 5000) {
+        posMs = 0;
+      } else {
+        posMs += elapsed;
+      }
     }
     const posSec = posMs / 1000;
 
