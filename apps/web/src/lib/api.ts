@@ -1,3 +1,5 @@
+import { useRoomStore } from '@/store/room-store';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -8,6 +10,15 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
       ...init?.headers,
     },
   });
+
+  if (res.ok) {
+    const serverDate = res.headers.get('Date');
+    if (serverDate) {
+      const serverTime = new Date(serverDate).getTime();
+      const offset = Date.now() - serverTime;
+      useRoomStore.getState().setClockOffset(offset);
+    }
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: 'Request failed' }));

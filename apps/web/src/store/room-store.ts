@@ -29,6 +29,8 @@ interface RoomStore {
   searchOpen: boolean;
   events: RoomEvent[];
   initialized: boolean;
+  clockOffset: number;
+  getPositionMs: (() => number) | null;
 
   setSocket: (socket: AppSocket | null) => void;
   setConnected: (connected: boolean) => void;
@@ -49,6 +51,8 @@ interface RoomStore {
   setSearchQuery: (query: string) => void;
   setInitialized: (initialized: boolean) => void;
   addEvent: (event: Omit<RoomEvent, 'id' | 'timestamp'>) => void;
+  setClockOffset: (offset: number) => void;
+  setGetPositionMs: (fn: (() => number) | null) => void;
   reset: () => void;
 }
 
@@ -65,6 +69,8 @@ const initialState = {
   searchQuery: '',
   events: [] as RoomEvent[],
   initialized: false,
+  clockOffset: 0,
+  getPositionMs: null,
 };
 
 export const useRoomStore = create<RoomStore>((set, get) => ({
@@ -153,6 +159,8 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
         events: [newEvent, ...state.events].slice(0, 10),
       };
     }),
+  setClockOffset: (clockOffset) => set({ clockOffset }),
+  setGetPositionMs: (getPositionMs) => set({ getPositionMs }),
 
   reset: () => set(initialState),
 }));

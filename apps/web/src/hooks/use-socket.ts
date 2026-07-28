@@ -93,6 +93,17 @@ export function useSocket() {
         }
       }
       addMember(data.member);
+
+      // Sync new member immediately if I am host
+      const state = useRoomStore.getState();
+      const isHost = state.room?.hostId === state.memberId;
+      if (isHost && socketRef.current && state.getPositionMs) {
+        socketRef.current.emit('heartbeat', {
+          code: state.room!.code,
+          memberId: state.memberId!,
+          positionMs: state.getPositionMs(),
+        });
+      }
     });
     socket.on('member-left', (data) => {
       const isInitialized = useRoomStore.getState().initialized;

@@ -74,6 +74,7 @@ export function useYouTubePlayer(containerId: string) {
   const playback = useRoomStore((s) => s.playback);
   const room = useRoomStore((s) => s.room);
   const socket = useRoomStore((s) => s.socket);
+  const clockOffset = useRoomStore((s) => s.clockOffset);
   const isHost = useIsHost();
   const lastVideoRef = useRef<string | null>(null);
   const syncingRef = useRef(false);
@@ -84,6 +85,13 @@ export function useYouTubePlayer(containerId: string) {
   }, []);
 
   useSyncHeartbeat(getPositionMs);
+
+  useEffect(() => {
+    useRoomStore.getState().setGetPositionMs(getPositionMs);
+    return () => {
+      useRoomStore.getState().setGetPositionMs(null);
+    };
+  }, [getPositionMs]);
 
   useEffect(() => {
     let mounted = true;
@@ -123,9 +131,10 @@ export function useYouTubePlayer(containerId: string) {
     if (lastVideoRef.current !== playback.videoId) {
       syncingRef.current = true;
 
+      const estimatedServerTime = Date.now() - clockOffset;
       let posMs = playback.positionMs;
       if (playback.playing && playback.startedAt) {
-        posMs += (Date.now() - playback.startedAt);
+        posMs += (estimatedServerTime - playback.startedAt);
       }
       const posSec = posMs / 1000;
 
@@ -140,7 +149,7 @@ export function useYouTubePlayer(containerId: string) {
         syncingRef.current = false;
       }, 1000);
     }
-  }, [ready, playback]);
+  }, [ready, playback, clockOffset]);
 
   useEffect(() => {
     if (!ready || !playerRef.current || !playback) return;
@@ -149,9 +158,10 @@ export function useYouTubePlayer(containerId: string) {
 
     syncingRef.current = true;
     
+    const estimatedServerTime = Date.now() - clockOffset;
     let posMs = playback.positionMs;
     if (playback.playing && playback.startedAt) {
-      posMs += (Date.now() - playback.startedAt);
+      posMs += (estimatedServerTime - playback.startedAt);
     }
     const posSec = posMs / 1000;
 
@@ -166,7 +176,7 @@ export function useYouTubePlayer(containerId: string) {
     setTimeout(() => {
       syncingRef.current = false;
     }, 300);
-  }, [ready, playback?.playing, playback?.positionMs, playback?.startedAt]);
+  }, [ready, playback?.playing, playback?.positionMs, playback?.startedAt, clockOffset]);
 
   useEffect(() => {
     const handler = (event: Event) => {
