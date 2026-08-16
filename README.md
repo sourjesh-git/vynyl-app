@@ -12,9 +12,9 @@ Live Web App: **[vynyl-web.vercel.app](https://vynyl-web.vercel.app)**
 
 ```mermaid
 graph TD
-    Client["vynyl Client (Next.js App)"] <-->|Socket.IO (Real-time Events)| Server["vynyl Server (NestJS Framework)"]
-    Client -->|REST API (Room Creation/Join)| Server
-    Server <-->|Session Store & State Synchronization| Redis["Upstash Redis Cache"]
+    Client["vynyl Client (Next.js App)"] ---|Socket.IO Real-time Events| Server["vynyl Server (NestJS Framework)"]
+    Client -->|REST API Room Creation/Join| Server
+    Server ---|Session Store & State Synchronization| Redis["Upstash Redis Cache"]
     Server -->|Track Queries| YT["YouTube Data API v3"]
     Client -->|Background Playback| YT_Iframe["YouTube Embedded IFrame Player"]
 
