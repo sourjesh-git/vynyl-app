@@ -2,6 +2,8 @@
 
 Collaborative, real-time synchronized music rooms. Create a room, invite your friends, and jam together in sync. 
 
+*Created and maintained by [Sourjesh Mukherjee](https://github.com/sourjesh-git).*
+
 Live Web App: **[vynyl-web.vercel.app](https://vynyl-web.vercel.app)**
 
 ---
