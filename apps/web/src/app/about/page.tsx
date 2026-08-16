@@ -4,9 +4,17 @@ import { ArrowLeft, Github, Linkedin, Zap, Globe, Lock, Music, Server } from 'lu
 export default function AboutPage() {
   return (
     <div className="relative min-h-screen bg-[#F6F3EE] text-[#1B1B1B] font-satoshi flex flex-col justify-between overflow-x-hidden">
-      {/* Concentric spiral background details */}
-      <div className="fixed -top-40 -right-40 w-96 h-96 rounded-full border border-black/5 pointer-events-none" />
-      <div className="fixed -bottom-40 -left-40 w-96 h-96 rounded-full border border-black/5 pointer-events-none" />
+      {/* Soft blurred scandinavian record player bg overlay matching home page */}
+      <div
+        className="fixed inset-0 -z-20 pointer-events-none"
+        style={{
+          backgroundImage: 'url(/webpage_hero.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'right 65% center',
+          filter: 'blur(40px)',
+        }}
+      />
+      <div className="fixed inset-0 -z-15 bg-[#F6F3EE]/78 pointer-events-none" />
 
       {/* Main Container */}
       <div className="flex-1 max-w-3xl mx-auto px-6 py-12 md:py-20 w-full space-y-12 z-10">

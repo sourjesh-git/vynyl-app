@@ -380,7 +380,7 @@ export function LandingHero() {
             className="absolute inset-0 w-full h-full object-cover object-right select-none scale-102"
           />
           {/* Smooth blend transition gradient on the left edge */}
-          <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#F6F3EE] via-[#F6F3EE]/60 to-transparent z-10 pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-[#F6F3EE] via-[#F6F3EE]/60 to-transparent z-10 pointer-events-none" />
 
           {/* Top-Right Badges overlay inside hero pane */}
           <div className="absolute top-8 right-8 z-10 flex items-center gap-4">
