@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, ArrowRight, Zap, Globe, Lock, Loader2, ArrowUpRight, Check, CornerDownLeft } from 'lucide-react';
+import { Users, ArrowRight, Zap, Globe, Lock, Loader2, ArrowUpRight, Check, CornerDownLeft, Sparkles, Github, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
 import { generateGuestName } from '@/lib/utils';
@@ -151,9 +151,9 @@ export function LandingHero() {
   return (
     <div className="relative min-h-screen bg-[#F6F3EE] text-[#1B1B1B] overflow-x-hidden font-satoshi flex flex-col justify-between">
       {/* 1. Main visual layout container (split view) */}
-      <div className="flex-1 flex flex-col md:flex-row relative min-h-screen">
+      <div className="flex-1 flex flex-col lg:flex-row relative min-h-screen">
         {/* Left Column: Headline, Actions, Bottom Panel */}
-        <div className="w-full md:w-[48%] px-6 sm:px-12 md:pl-16 md:pr-12 py-10 flex flex-col justify-between min-h-[85vh] md:min-h-screen z-10">
+        <div className="w-full lg:w-[48%] px-6 sm:px-12 lg:pl-16 lg:pr-12 py-10 flex flex-col justify-between min-h-[85vh] lg:min-h-screen z-10">
           {/* Logo / Top Bar */}
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2.5">
@@ -172,7 +172,7 @@ export function LandingHero() {
               </span>
             </div>
 
-            <div className="flex items-center gap-3.5 md:hidden">
+            <div className="flex items-center gap-3.5 lg:hidden">
               <span className="rounded-full bg-[#C7D1C0] px-3.5 py-1 text-[11px] font-bold text-[#1B1B1B] tracking-wider uppercase">
                 ✦ 100% Free
               </span>
@@ -303,14 +303,77 @@ export function LandingHero() {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* 2x2 Grid of Feature Tiles */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 mt-6 border-t border-[#1B1B1B]/5">
+              {/* Sync item */}
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/40 border border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                <div className="h-8 w-8 shrink-0 rounded-lg bg-white/50 flex items-center justify-center border border-white/50">
+                  <Zap className="h-4 w-4 text-[#E07A5F]" />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-bold tracking-wider text-[#1B1B1B] uppercase">
+                    Real-time sync
+                  </h4>
+                  <p className="text-[10px] text-[#1B1B1B]/60 leading-normal mt-0.5 font-medium">
+                    Everyone hears the exact same moment.
+                  </p>
+                </div>
+              </div>
+
+              {/* Device item */}
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/40 border border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                <div className="h-8 w-8 shrink-0 rounded-lg bg-white/50 flex items-center justify-center border border-white/50">
+                  <Globe className="h-4 w-4 text-[#E07A5F]" />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-bold tracking-wider text-[#1B1B1B] uppercase">
+                    Works anywhere
+                  </h4>
+                  <p className="text-[10px] text-[#1B1B1B]/60 leading-normal mt-0.5 font-medium">
+                    On any device. No installs.
+                  </p>
+                </div>
+              </div>
+
+              {/* Login item */}
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/40 border border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                <div className="h-8 w-8 shrink-0 rounded-lg bg-white/50 flex items-center justify-center border border-white/50">
+                  <Lock className="h-4 w-4 text-[#E07A5F]" />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-bold tracking-wider text-[#1B1B1B] uppercase">
+                    No login
+                  </h4>
+                  <p className="text-[10px] text-[#1B1B1B]/60 leading-normal mt-0.5 font-medium">
+                    Jump in instantly with just a name.
+                  </p>
+                </div>
+              </div>
+
+              {/* Totally Free item */}
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/40 border border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                <div className="h-8 w-8 shrink-0 rounded-lg bg-white/50 flex items-center justify-center border border-white/50">
+                  <Sparkles className="h-4 w-4 text-[#E07A5F]" />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-bold tracking-wider text-[#1B1B1B] uppercase">
+                    Totally Free
+                  </h4>
+                  <p className="text-[10px] text-[#1B1B1B]/60 leading-normal mt-0.5 font-medium">
+                    100% free forever. No ads.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Bottom spacer for layout alignment on desktop */}
-          <div className="h-10 hidden md:block" />
+          <div className="h-10 hidden lg:block" />
         </div>
 
         {/* Right Column: Hero Image (hidden on mobile) */}
-        <div className="hidden md:block md:w-[52%] relative min-h-screen overflow-hidden select-none">
+        <div className="hidden lg:block lg:w-[52%] relative min-h-screen overflow-hidden select-none">
           <img
             src="/webpage_hero.png"
             alt="Warm Scandinavian vinyl record player setup"
@@ -334,55 +397,92 @@ export function LandingHero() {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. Overlaid Bottom Translucent Feature Grid */}
-      {/* ========================================================================= */}
-      <div className="w-full max-w-7xl mx-auto px-6 pb-10 md:absolute md:bottom-8 md:left-1/2 md:-translate-x-1/2 z-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 rounded-3xl bg-white/40 backdrop-blur-lg border border-white/60 p-6 md:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
-          {/* Sync item */}
-          <div className="flex items-center gap-4 px-2">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-white/50 flex items-center justify-center border border-white/50">
-              <Zap className="h-4.5 w-4.5 text-[#E07A5F]" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold tracking-wider text-[#1B1B1B] uppercase">
-                Real-time sync
-              </h4>
-              <p className="text-[11px] text-[#1B1B1B]/60 leading-normal mt-0.5 font-medium">
-                Everyone hears the exact same moment.
-              </p>
-            </div>
-          </div>
+      {/* 2. Scroll-triggered footer */}
+      <LandingFooter />
+    </div>
+  );
+}
 
-          {/* Device item */}
-          <div className="flex items-center gap-4 px-2 border-t md:border-t-0 md:border-x border-charcoal/5 py-4 md:py-0">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-white/50 flex items-center justify-center border border-white/50">
-              <Globe className="h-4.5 w-4.5 text-[#E07A5F]" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold tracking-wider text-[#1B1B1B] uppercase">
-                Works anywhere
-              </h4>
-              <p className="text-[11px] text-[#1B1B1B]/60 leading-normal mt-0.5 font-medium">
-                On any device. No installs.
-              </p>
-            </div>
-          </div>
+function LandingFooter() {
+  const [scrolled, setScrolled] = useState(false);
 
-          {/* Login item */}
-          <div className="flex items-center gap-4 px-2">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-white/50 flex items-center justify-center border border-white/50">
-              <Lock className="h-4.5 w-4.5 text-[#E07A5F]" />
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 80) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <footer
+      className={`w-full py-10 px-6 sm:px-12 lg:px-16 border-t border-[#1B1B1B]/10 bg-[#EBE1D6]/70 transition-opacity duration-500 ease-in-out ${
+        scrolled ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8 text-[12px] leading-relaxed text-[#1B1B1B]/70 font-satoshi">
+        <div className="max-w-xl space-y-3">
+          <p>
+            Audio is streamed through YouTube’s embedded player; all rights remain with the respective labels, composers and performers. Nothing is hosted here. Song credits are compiled from film soundtrack listings.
+          </p>
+          <p className="font-semibold text-[#1B1B1B]">
+            Hold rights to something here and want it removed? Email{' '}
+            <a
+              href="mailto:11n44sourjeshmukherjee@gmail.com"
+              className="text-[#E07A5F] hover:underline font-bold transition-all"
+            >
+              11n44sourjeshmukherjee@gmail.com
+            </a>{' '}
+            and it comes down.
+          </p>
+        </div>
+        <div className="flex flex-col md:items-end justify-between gap-4 shrink-0">
+          <div className="flex items-center gap-2.5">
+            {/* Logo / Brand */}
+            <div className="relative h-7 w-7 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border border-charcoal/20 flex items-center justify-center animate-spin-slow">
+                <div className="h-5 w-5 rounded-full border border-charcoal/30 flex items-center justify-center">
+                  <div className="h-3 w-3 rounded-full border border-charcoal/40 flex items-center justify-center">
+                    <div className="h-1 w-1 bg-charcoal rounded-full" />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <h4 className="text-xs font-bold tracking-wider text-[#1B1B1B] uppercase">No login</h4>
-              <p className="text-[11px] text-[#1B1B1B]/60 leading-normal mt-0.5 font-medium">
-                Jump in instantly with just a name.
-              </p>
-            </div>
+            <span className="text-xl font-bold tracking-tight text-black font-satoshi lowercase">
+              vynyl
+            </span>
+          </div>
+          <div className="flex flex-col md:items-end gap-1.5">
+            <p className="text-[11px] text-[#1B1B1B]/50 font-medium flex items-center gap-2.5">
+              <span>&copy; {new Date().getFullYear()} vynyl. Built by <span className="text-[#1B1B1B]/80 font-bold">Sourjesh Mukherjee</span></span>
+              <span className="inline-flex items-center gap-2 border-l border-black/10 pl-2.5">
+                <a
+                  href="https://github.com/sourjesh-git/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1B1B1B]/60 hover:text-[#1B1B1B] transition-colors"
+                  title="GitHub Profile"
+                >
+                  <Github className="h-3.5 w-3.5" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/sourjesh-mukherjee-5ba657258/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1B1B1B]/60 hover:text-[#0077B5] transition-colors"
+                  title="LinkedIn Profile"
+                >
+                  <Linkedin className="h-3.5 w-3.5" />
+                </a>
+              </span>
+            </p>
           </div>
         </div>
       </div>
-    </div>
+    </footer>
   );
 }
