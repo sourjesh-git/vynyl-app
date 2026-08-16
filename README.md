@@ -1,83 +1,107 @@
-# SyncRoom
+# vynyl — Listen Together ✦
 
-Collaborative music listening — create a room, share a code, listen in sync.
+Collaborative, real-time synchronized music rooms. Create a room, invite your friends, and jam together in sync. 
 
-## Stack
+Live Web App: **[vynyl-web.vercel.app](https://vynyl-web.vercel.app)**
 
-- **Frontend:** Next.js, React, TypeScript, TailwindCSS, shadcn/ui, Zustand, Socket.IO Client, React Query
-- **Backend:** NestJS, Socket.IO, Redis, YouTube Data API, Zod, ioredis
+---
 
-## Getting Started
+## ✦ System Architecture (Simplified)
 
-### Prerequisites
+```mermaid
+graph TD
+    Client["vynyl Client (Next.js App)"] <-->|Socket.IO (Real-time Events)| Server["vynyl Server (NestJS Framework)"]
+    Client -->|REST API (Room Creation/Join)| Server
+    Server <-->|Session Store & State Synchronization| Redis["Upstash Redis Cache"]
+    Server -->|Track Queries| YT["YouTube Data API v3"]
+    Client -->|Background Playback| YT_Iframe["YouTube Embedded IFrame Player"]
 
-- Node.js 20+
-- Redis (local or [Upstash](https://upstash.com/))
-- YouTube Data API key (optional — mock results used without it)
+    style Client fill:#F6F3EE,stroke:#1B1B1B,stroke-width:2px,color:#1B1B1B
+    style Server fill:#EBE1D6,stroke:#1B1B1B,stroke-width:2px,color:#1B1B1B
+    style Redis fill:#C7D1C0,stroke:#2D5A46,stroke-width:2px,color:#2D5A46
+    style YT fill:#E07A5F,stroke:#1B1B1B,stroke-width:2px,color:#FFF
+    style YT_Iframe fill:#E07A5F,stroke:#1B1B1B,stroke-width:2px,color:#FFF
+```
 
-### Install
+---
 
+## ✦ Core Features
+
+- **Real-Time Sync:** Socket.IO handles sub-second track syncing so everyone in the room hears the exact same moment.
+- **Works Anywhere:** Clean, responsive design optimized for standard PCs, MacBook Air/Laptops (re-renders only the footer on scroll to prevent subpixel scaling glitches), tablets (polished mobile tabs layout), and mobile devices.
+- **Background Playback on Mobile:** Tab switching does not unmount the audio player, preserving background listening.
+- **No Login Required:** Enter your name, copy the 6-character room code, and start playing.
+- **Concentric Record Spiral Brand Logo:** Visual vinyl spinning assets synced across headers, sidebars, and footers.
+- **Totally Free:** 100% free forever with no ads.
+- **YouTube Search & Collaborative Queue:** Find tracks dynamically and queue them up.
+- **Keyboard Shortcuts:** 
+  - `/` to focus the search bar.
+  - `Space` to play/pause (from anywhere on the body).
+  - `Escape` to blur/close the search autocomplete.
+
+---
+
+## ✦ Technical Stack
+
+- **Frontend (Web):** Next.js (App Router), React 19, TypeScript, TailwindCSS, shadcn/ui, Zustand, Socket.IO Client, Framer Motion
+- **Backend (Server):** NestJS, Socket.IO, Redis Client (`ioredis`), YouTube Data API, Zod
+- **Shared Type Library:** `@syncroom/shared` monorepo package containing socket event payloads and database schema type contracts
+
+---
+
+## ✦ Deployments
+
+- **Frontend:** Hosted on [Vercel](https://vercel.com) -> **[vynyl-web.vercel.app](https://vynyl-web.vercel.app)**
+- **Backend Server:** Hosted on [Railway](https://railway.app)
+- **Redis Cache:** Hosted on [Upstash Redis](https://upstash.com)
+
+---
+
+## ✦ Getting Started (Local Development)
+
+### 1. Prerequisites
+- **Node.js** 20 or higher
+- **Redis** running locally (or Upstash instance)
+- **YouTube Data API key** (Optional: fallbacks to mock results if omitted)
+
+### 2. Installation
+Install root dependencies and compile the shared libraries:
 ```bash
 npm install
 npm run build:shared
 ```
 
-### Environment
-
-Copy env examples and configure:
+### 3. Environment Setup
+Configure environment files in respective packages:
 
 ```bash
 cp apps/server/.env.example apps/server/.env
 cp apps/web/.env.example apps/web/.env.local
 ```
 
-**Server (`apps/server/.env`):**
+**Configure Server (`apps/server/.env`):**
+- `PORT=3001`
+- `CORS_ORIGIN=http://localhost:3000`
+- `REDIS_URL=redis://localhost:6379`
+- `YOUTUBE_API_KEY=your_key`
 
-| Variable | Description |
-|----------|-------------|
-| `PORT` | API port (default `3001`) |
-| `CORS_ORIGIN` | Frontend URL |
-| `REDIS_URL` | Redis connection string |
-| `YOUTUBE_API_KEY` | YouTube Data API v3 key |
+**Configure Web (`apps/web/.env.local`):**
+- `NEXT_PUBLIC_API_URL=http://localhost:3001`
+- `NEXT_PUBLIC_SOCKET_URL=http://localhost:3001`
 
-**Web (`apps/web/.env.local`):**
-
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | Backend REST URL |
-| `NEXT_PUBLIC_SOCKET_URL` | Backend Socket.IO URL |
-
-### Run
-
+### 4. Running the Dev Servers
+Start both the NestJS server and Next.js client concurrently:
 ```bash
-# Start Redis locally, then:
 npm run dev
 ```
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:3001
+- **Frontend:** [http://localhost:3000](http://localhost:3000)
+- **Backend:** [http://localhost:3001](http://localhost:3001)
 
-## Project Structure
+---
 
-```
-apps/
-  web/          Next.js frontend
-  server/       NestJS backend
-packages/
-  shared/       Shared types & socket events
-```
+## ✦ DMCA and Copyright
 
-## Features
+Audio is streamed through YouTube’s embedded player; all rights remain with the respective labels, composers, and performers. Nothing is hosted on our servers. 
 
-- Create/join rooms with 6-character codes
-- In-app YouTube search with caching & ranking
-- Synchronized playback (play, pause, seek, skip)
-- Shared queue with auto-advance
-- Real-time presence & host transfer
-- Keyboard shortcuts: `/` search, `Space` play/pause, `Esc` close search
-
-## Deployment
-
-- **Frontend:** Vercel — set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SOCKET_URL`
-- **Backend:** Railway — set `REDIS_URL`, `CORS_ORIGIN`, `YOUTUBE_API_KEY`
-- **Redis:** Upstash
+*Hold rights to something here and want it removed? Email **11n44sourjeshmukherjee@gmail.com** and it will be taken down immediately.*
