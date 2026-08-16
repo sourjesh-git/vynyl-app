@@ -397,7 +397,88 @@ export function LandingHero() {
         </div>
       </div>
 
-      {/* 2. Scroll-triggered footer */}
+      {/* 2. Explanation Section (Visible when scrolling below the fold) */}
+      <section className="w-full py-16 px-6 sm:px-12 lg:px-16 bg-[#F6F3EE] border-t border-[#1B1B1B]/5 z-10 relative">
+        <div className="max-w-4xl mx-auto space-y-12">
+          {/* Main concise crawlable card */}
+          <div className="text-center space-y-4 max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1B1B1B] font-canela">
+              Listen to YouTube together with your friends.
+            </h2>
+            <p className="text-base sm:text-lg text-[#1B1B1B]/80 font-medium font-satoshi leading-relaxed">
+              vynyl is a shared listening room where friends can play music together, build a queue, and listen in sync.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-6">
+            {/* Column 1: What is vynyl & How it works */}
+            <div className="space-y-4 text-left">
+              <h3 className="text-lg font-bold text-[#E07A5F] font-canela uppercase tracking-wider">
+                What is vynyl?
+              </h3>
+              <p className="text-sm text-[#1B1B1B]/75 leading-relaxed font-satoshi">
+                vynyl is a lightweight, login-free social music platform built on top of YouTube's massive library. It allows you to synchronize audio streams across multiple devices. When the host plays, pauses, or seeks a track, every listener hears the exact same moment in real-time.
+              </p>
+              <h3 className="text-lg font-bold text-[#E07A5F] font-canela uppercase tracking-wider pt-2">
+                Learn More
+              </h3>
+              <p className="text-sm text-[#1B1B1B]/75 leading-relaxed font-satoshi">
+                Want to dive deeper into our technology, architecture, and background story? Read the{' '}
+                <a
+                  href="/about"
+                  className="text-[#E07A5F] hover:underline font-bold transition-all"
+                >
+                  About Vynyl
+                </a>{' '}
+                page.
+              </p>
+            </div>
+
+            {/* Column 2: How to use step by step */}
+            <div className="space-y-4 text-left">
+              <h3 className="text-lg font-bold text-[#E07A5F] font-canela uppercase tracking-wider">
+                How to use it
+              </h3>
+              <ol className="space-y-3.5 text-sm text-[#1B1B1B]/75 font-satoshi">
+                <li className="flex gap-3">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1B1B1B] text-[10px] font-bold text-white">
+                    1
+                  </span>
+                  <span>
+                    <strong>Create a Room:</strong> Enter your name and click the create button on the home page.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1B1B1B] text-[10px] font-bold text-white">
+                    2
+                  </span>
+                  <span>
+                    <strong>Invite Friends:</strong> Copy the unique 6-character room code and send it to your group.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1B1B1B] text-[10px] font-bold text-white">
+                    3
+                  </span>
+                  <span>
+                    <strong>Search & Queue:</strong> Search for your favorite tracks and load them into the collaborative playlist.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1B1B1B] text-[10px] font-bold text-white">
+                    4
+                  </span>
+                  <span>
+                    <strong>Listen in Sync:</strong> Sit back and enjoy. Every playback action is instantly mirrored for all members.
+                  </span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Scroll-triggered footer */}
       <LandingFooter />
     </div>
   );
