@@ -403,7 +403,7 @@ export function LandingHero() {
           {/* Main concise crawlable card */}
           <div className="text-center space-y-4 max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1B1B1B] font-canela">
-              Listen to YouTube together with your friends.
+              Jam with your friends in real-time.
             </h2>
             <p className="text-base sm:text-lg text-[#1B1B1B]/80 font-medium font-satoshi leading-relaxed">
               vynyl is a shared listening room where friends can play music together, build a queue, and listen in sync.

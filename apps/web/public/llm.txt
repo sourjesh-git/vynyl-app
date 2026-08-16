@@ -1,6 +1,6 @@
 # vynyl - Listen Together ✦
 
-Collaborative, real-time synchronized music rooms. Listen to YouTube in sync with friends.
+Collaborative, real-time synchronized music rooms. Listen to music in sync with friends.
 
 ## Domain
 - https://vynyl-web.vercel.app

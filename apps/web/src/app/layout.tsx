@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'vynyl — Listen Together',
-    description: 'Listen to YouTube together with your friends in real-time. Create a room, build a queue, and jam in sync.',
+    description: 'Jam with your friends in real-time. Create a room, build a queue, and vibe in sync.',
     images: ['/webpage_hero.png'],
   },
 };
