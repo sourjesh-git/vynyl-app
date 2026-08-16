@@ -1,0 +1,19 @@
+# vynyl - Listen Together ✦
+
+Collaborative, real-time synchronized music rooms. Listen to YouTube in sync with friends.
+
+## Domain
+- https://vynyl-web.vercel.app
+
+## Project Description
+vynyl is a web application where users can create synchronized music listening rooms. One user is the host, who controls playback (play, pause, seek, skip), and other users join as listeners to hear the exact same audio stream concurrently. Audio is played via YouTube's Embedded Player API.
+
+## Technical Architecture
+- Frontend: Next.js (App Router), React, TypeScript, TailwindCSS, Zustand, Socket.IO Client.
+- Backend: NestJS (REST + WebSockets), Redis (Upstash) for session/playback state storage.
+- Communication: Sub-second Socket.IO events synchronize positions.
+
+## Security & API Limits
+- REST Endpoints: Only POST /rooms (room creation) and POST /rooms/:code/join (joining). Rate-limited.
+- WebSocket Socket.IO: Restrictive namespaces, all room events (load-track, play, pause, seek, next-track) require valid room codes.
+- Abuse Policy: Do not flood WebSocket connections or make massive search queries. Rate limiting is enforced at the server level.
