@@ -124,12 +124,12 @@ export function PlayerSection() {
   return (
     <div className="w-full flex flex-col gap-8 text-[#1B1B1B] font-satoshi py-2">
       {/* Player content (Direct split layout, not inside cards) */}
-      <div className="flex flex-col gap-8 md:flex-row items-center md:items-start md:gap-10">
+      <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center sm:items-start lg:items-center xl:items-start gap-6 sm:gap-8 lg:gap-6 xl:gap-10 w-full">
         {/* Album Artwork */}
         <motion.div
           animate={{ scale: localPlaying ? 1.015 : 1 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="relative h-[180px] w-[180px] lg:h-[300px] lg:w-[300px] shrink-0 overflow-hidden rounded-3xl bg-black/5 border border-[#1B1B1B]/5 shadow-[0_12px_36px_rgba(0,0,0,0.08)]"
+          className="relative h-[180px] w-[180px] sm:h-[220px] sm:w-[220px] lg:h-[200px] lg:w-[200px] xl:h-[300px] xl:w-[300px] shrink-0 overflow-hidden rounded-3xl bg-black/5 border border-[#1B1B1B]/5 shadow-[0_12px_36px_rgba(0,0,0,0.08)]"
         >
           {playback.thumbnail && (
             <Image
@@ -143,7 +143,7 @@ export function PlayerSection() {
         </motion.div>
 
         {/* Player details, seekbar, controls */}
-        <div className="flex-1 w-full flex flex-col justify-between min-h-[256px] text-center md:text-left gap-5">
+        <div className="flex-1 w-full flex flex-col justify-between min-h-[200px] xl:min-h-[256px] text-center sm:text-left lg:text-center xl:text-left gap-5">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-[#E07A5F] tracking-widest uppercase">
               Now playing
@@ -205,7 +205,7 @@ export function PlayerSection() {
           </div>
 
           {/* Controls bar (Play/Pause, Prev, Next, Shuffle, Repeat) */}
-          <div className="flex items-center justify-center md:justify-start gap-5 pt-1">
+          <div className="flex items-center justify-center sm:justify-start lg:justify-center xl:justify-start gap-5 pt-1">
             <button
               className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${isHost
                 ? 'bg-[#1B1B1B] text-white hover:bg-black'
@@ -273,7 +273,7 @@ export function PlayerSection() {
       </div>
 
       {/* Rebuilt Premium Volume Slider */}
-      <div className="flex items-center gap-3.5 max-w-[220px] mt-4 group/volume mx-auto md:mx-0">
+      <div className="flex items-center gap-3.5 max-w-[220px] mt-4 group/volume mx-auto sm:mx-0 lg:mx-auto xl:mx-0 shrink-0">
         <Button
           size="icon"
           className="h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm bg-[#1B1B1B] text-white hover:bg-black shrink-0"

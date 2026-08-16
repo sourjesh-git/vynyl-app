@@ -170,7 +170,7 @@ export function QueueSection({ isMobile = false }: { isMobile?: boolean }) {
           </p>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto pr-1 space-y-1 max-h-[460px]">
+        <div className="flex-1 overflow-y-auto pr-1 space-y-1">
           {renderQueueList()}
         </div>
       )}

@@ -134,3 +134,17 @@
 .font-satoshi {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
+
+.landing-bottom-grid {
+  position: relative;
+}
+
+@media (min-height: 800px) and (min-width: 1024px) {
+  .landing-bottom-grid {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+

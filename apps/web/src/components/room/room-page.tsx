@@ -231,10 +231,10 @@ export function RoomPage({ code }: { code: string }) {
   const currentUser = room.members.find((m) => m.id === memberId);
 
   return (
-    <div className="relative min-h-screen text-[#1B1B1B] overflow-hidden font-satoshi select-none flex flex-col md:flex-row">
+    <div className="relative min-h-screen text-[#1B1B1B] overflow-hidden font-satoshi select-none flex flex-col lg:flex-row">
       {/* 1. Page split backgrounds */}
-      <div className="fixed inset-y-0 left-0 w-72 bg-[#EBE1D6] -z-30 hidden md:block border-r border-[#1B1B1B]/5" />
-      <div className="fixed inset-y-0 right-0 left-0 md:left-72 -z-30 pointer-events-none" />
+      <div className="fixed inset-y-0 left-0 lg:w-64 xl:w-72 bg-[#EBE1D6] -z-30 hidden lg:block border-r border-[#1B1B1B]/5" />
+      <div className="fixed inset-y-0 right-0 left-0 lg:left-64 xl:left-72 -z-30 pointer-events-none" />
 
       {/* 2. Soft blurred scandinavian record player bg overlay matching landing page */}
       <div
@@ -251,9 +251,9 @@ export function RoomPage({ code }: { code: string }) {
       {/* ========================================================================= */}
       {/* DESKTOP LAYOUT (Screen size >= md) */}
       {/* ========================================================================= */}
-      <div className="hidden md:flex flex-1 w-full min-h-screen overflow-hidden">
+      <div className="hidden lg:flex flex-1 w-full min-h-screen overflow-hidden">
         {/* LEFT COLUMN: Sidebar (Vynyl Brand, Code copy, Members, Invite) */}
-        <aside className="w-72 shrink-0">
+        <aside className="lg:w-64 xl:w-72 shrink-0">
           <MembersSection />
         </aside>
 
@@ -373,7 +373,7 @@ export function RoomPage({ code }: { code: string }) {
             </div>
 
             {/* Queue Panel (always visible) */}
-            <div className="w-[360px] shrink-0 h-full flex flex-col">
+            <div className="lg:w-[300px] xl:w-[360px] shrink-0 h-full flex flex-col">
               <QueueSection />
             </div>
           </div>
@@ -383,7 +383,7 @@ export function RoomPage({ code }: { code: string }) {
       {/* ========================================================================= */}
       {/* MOBILE LAYOUT (Screen size < md) */}
       {/* ========================================================================= */}
-      <div className="md:hidden flex flex-col flex-1 w-full min-h-screen pb-20 overflow-hidden">
+      <div className="lg:hidden flex flex-col flex-1 w-full min-h-screen pb-20 overflow-hidden">
         {/* Top Header bar */}
         <header className="flex items-center justify-between border-b border-black/5 bg-[#F6F3EE]/80 backdrop-blur-md px-5 py-4 sticky top-0 z-40">
           <div className="flex items-center gap-2.5">
@@ -412,21 +412,13 @@ export function RoomPage({ code }: { code: string }) {
 
         {/* Content area based on active bottom navbar tab selection */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          <AnimatePresence mode="wait">
-            {activeTab === 'player' && (
-              <motion.div
-                key="player"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.15 }}
-                className="space-y-4"
-              >
-                <PlayerSection />
-                <QueueSection isMobile={true} />
-              </motion.div>
-            )}
+          {/* Always mount PlayerSection so the YouTube iframe is not destroyed when tabs change on mobile/tablet */}
+          <div className={activeTab !== 'player' ? 'hidden' : 'space-y-4'}>
+            <PlayerSection />
+            <QueueSection isMobile={true} />
+          </div>
 
+          <AnimatePresence mode="wait">
             {activeTab === 'queue' && (
               <motion.div
                 key="queue"
