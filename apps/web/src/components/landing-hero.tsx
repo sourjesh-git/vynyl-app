@@ -51,7 +51,7 @@ export function LandingHero() {
             queue: response.queue ?? [],
             currentIndex: response.currentIndex ?? -1,
           });
-          
+
           try {
             localStorage.setItem(
               `vynyl_room_${response.room.code.toUpperCase()}`,
@@ -60,7 +60,7 @@ export function LandingHero() {
           } catch (e) {
             console.error(e);
           }
-          
+
           router.push(`/room/${response.room.code}`);
         } else {
           router.push(
@@ -420,9 +420,8 @@ function LandingFooter() {
 
   return (
     <footer
-      className={`w-full py-10 px-6 sm:px-12 lg:px-16 border-t border-[#1B1B1B]/10 bg-[#EBE1D6]/70 transition-opacity duration-500 ease-in-out ${
-        scrolled ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}
+      className={`w-full py-10 px-6 sm:px-12 lg:px-16 border-t border-[#1B1B1B]/10 bg-[#EBE1D6]/70 transition-opacity duration-500 ease-in-out ${scrolled ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
     >
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8 text-[12px] leading-relaxed text-[#1B1B1B]/70 font-satoshi">
         <div className="max-w-xl space-y-3">
@@ -467,7 +466,7 @@ function LandingFooter() {
                   className="text-[#1B1B1B]/60 hover:text-[#1B1B1B] transition-colors"
                   title="GitHub Profile"
                 >
-                  <Github className="h-3.5 w-3.5" />
+                  <Github className="h-4.5 w-4.5" />
                 </a>
                 <a
                   href="https://www.linkedin.com/in/sourjesh-mukherjee-5ba657258/"
@@ -476,7 +475,7 @@ function LandingFooter() {
                   className="text-[#1B1B1B]/60 hover:text-[#0077B5] transition-colors"
                   title="LinkedIn Profile"
                 >
-                  <Linkedin className="h-3.5 w-3.5" />
+                  <Linkedin className="h-4.5 w-4.5" />
                 </a>
               </span>
             </p>
