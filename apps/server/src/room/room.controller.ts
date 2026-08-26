@@ -1,7 +1,9 @@
-import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { RoomService } from './room.service';
 import { QueueService } from '../queue/queue.service';
+import { RateLimit } from '../common/decorators/rate-limit.decorator';
+import { RateLimitGuard } from '../common/guards/rate-limit.guard';
 
 const createRoomSchema = z.object({
   name: z.string().min(1).max(32).optional(),
@@ -13,6 +15,7 @@ const joinRoomSchema = z.object({
 });
 
 @Controller('rooms')
+@UseGuards(RateLimitGuard)
 export class RoomController {
   constructor(
     private readonly roomService: RoomService,
@@ -20,12 +23,14 @@ export class RoomController {
   ) {}
 
   @Post()
+  @RateLimit({ points: 5, durationSeconds: 60 })
   async createRoom(@Body() body: unknown) {
     const parsed = createRoomSchema.parse(body);
     return this.roomService.createRoom(parsed.name ?? 'Host');
   }
 
   @Post(':code/join')
+  @RateLimit({ points: 10, durationSeconds: 60 })
   async joinRoom(@Param('code') code: string, @Body() body: unknown) {
     const parsed = joinRoomSchema.parse(body);
     try {

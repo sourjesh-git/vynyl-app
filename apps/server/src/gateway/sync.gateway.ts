@@ -19,6 +19,7 @@ import { RoomService } from '../room/room.service';
 import { QueueService } from '../queue/queue.service';
 import { SyncService } from '../sync/sync.service';
 import { PresenceService } from '../presence/presence.service';
+import { SocketRateLimiterService } from '../common/rate-limiter/socket-rate-limiter.service';
 
 interface SocketData {
   code?: string;
@@ -47,6 +48,7 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly queueService: QueueService,
     private readonly syncService: SyncService,
     private readonly presenceService: PresenceService,
+    private readonly socketRateLimiter: SocketRateLimiterService,
   ) {}
 
   handleConnection(client: AppSocket) {
@@ -106,6 +108,10 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { name: string },
   ): Promise<JoinRoomAck> {
     try {
+      if (await this.socketRateLimiter.isRateLimited(client.id, 'create-room', 3, 60)) {
+        return { success: false, error: 'Too many room creations. Please slow down.' };
+      }
+
       this.logger.log(`Creating room for user "${data.name}"`);
       const result = await this.roomService.createRoom(data.name);
       this.logger.log(`Room created: ${result.code} by host ${result.memberId}`);
@@ -220,6 +226,11 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { code: string; positionMs?: number },
   ) {
     if (!(await this.assertHost(client, data.code))) return;
+    if (await this.socketRateLimiter.isRateLimited(client.id, 'playback-control', 10, 5)) {
+      client.emit('error', { message: 'Too many playback actions. Please slow down.' });
+      return;
+    }
+
     this.logger.log(`Room ${data.code.toUpperCase()}: Play requested at position ${data.positionMs ?? 'current'}ms`);
     const playback = await this.syncService.play(data.code, data.positionMs);
     this.broadcastPlayback(data.code, playback);
@@ -231,6 +242,11 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { code: string; positionMs?: number },
   ) {
     if (!(await this.assertHost(client, data.code))) return;
+    if (await this.socketRateLimiter.isRateLimited(client.id, 'playback-control', 10, 5)) {
+      client.emit('error', { message: 'Too many playback actions. Please slow down.' });
+      return;
+    }
+
     this.logger.log(`Room ${data.code.toUpperCase()}: Pause requested at position ${data.positionMs ?? 'current'}ms`);
     const playback = await this.syncService.pause(data.code, data.positionMs);
     this.broadcastPlayback(data.code, playback);
@@ -242,6 +258,11 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { code: string; positionMs: number },
   ) {
     if (!(await this.assertHost(client, data.code))) return;
+    if (await this.socketRateLimiter.isRateLimited(client.id, 'playback-control', 10, 5)) {
+      client.emit('error', { message: 'Too many playback actions. Please slow down.' });
+      return;
+    }
+
     this.logger.log(`Room ${data.code.toUpperCase()}: Seek requested to ${data.positionMs}ms`);
     const playback = await this.syncService.seek(data.code, data.positionMs);
     this.broadcastPlayback(data.code, playback);
@@ -303,6 +324,11 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const info = this.socketMembers.get(client.id);
     if (!info) return;
+
+    if (await this.socketRateLimiter.isRateLimited(client.id, 'queue-add', 10, 60)) {
+      client.emit('error', { message: 'Too many tracks added. Please slow down.' });
+      return;
+    }
 
     this.logger.log(`Room ${data.code.toUpperCase()}: Member ${info.memberId} adding track "${data.item.title}" to queue`);
     const item = {
