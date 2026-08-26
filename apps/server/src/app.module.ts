@@ -7,11 +7,13 @@ import { SearchModule } from './search/search.module';
 import { SyncModule } from './sync/sync.module';
 import { PresenceModule } from './presence/presence.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { CommonModule } from './common/common.module';
 import { AppController } from './app.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CommonModule,
     RedisModule,
     RoomModule,
     QueueModule,
