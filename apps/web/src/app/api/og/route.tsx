@@ -17,24 +17,24 @@ export async function GET(req: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: '56px 64px',
+          padding: '48px 56px',
           backgroundColor: '#0A0A0E',
           color: '#FFFFFF',
           fontFamily: 'system-ui, -apple-system, sans-serif',
           position: 'relative',
         }}
       >
-        {/* Subtle Ambient Radial Glow (Top Right) */}
+        {/* Subtle Ambient Radial Glow */}
         <div
           style={{
             position: 'absolute',
             top: '-150px',
             right: '-150px',
-            width: '600px',
-            height: '600px',
+            width: '650px',
+            height: '650px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(224, 122, 95, 0.12)',
-            filter: 'blur(100px)',
+            backgroundColor: 'rgba(224, 122, 95, 0.14)',
+            filter: 'blur(110px)',
           }}
         />
 
@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
         <div
           style={{
             display: 'flex',
+            flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
             width: '100%',
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
           }}
         >
           {/* Logo Branding - Concentric Vinyl Rings */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '14px' }}>
             <div
               style={{
                 width: '36px',
@@ -107,12 +108,12 @@ export async function GET(req: NextRequest) {
           </div>
 
           {/* Top Right Badges */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
                 backgroundColor: '#C7D1C0',
                 color: '#1B1B1B',
-                padding: '6px 16px',
+                padding: '6px 18px',
                 borderRadius: '100px',
                 fontSize: '13px',
                 fontWeight: 700,
@@ -127,7 +128,7 @@ export async function GET(req: NextRequest) {
                 backgroundColor: 'rgba(255, 255, 255, 0.08)',
                 color: 'rgba(255, 255, 255, 0.85)',
                 border: '1px solid rgba(255, 255, 255, 0.12)',
-                padding: '6px 16px',
+                padding: '6px 18px',
                 borderRadius: '100px',
                 fontSize: '13px',
                 fontWeight: 600,
@@ -138,130 +139,152 @@ export async function GET(req: NextRequest) {
           </div>
         </div>
 
-        {/* Main Content Card Container */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '18px',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '28px',
-            padding: '40px 48px',
-            margin: '20px 0',
-            zIndex: 10,
-          }}
-        >
-          {code ? (
-            <>
-              <div
+        {/* Center Card Container */}
+        {code ? (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%',
+              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '24px',
+              padding: '44px 48px',
+              gap: '20px',
+              zIndex: 10,
+            }}
+          >
+            {/* Tag line */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '13px',
+                fontWeight: 800,
+                letterSpacing: '2.5px',
+                color: '#E07A5F',
+                textTransform: 'uppercase',
+              }}
+            >
+              SHARED LISTENING ROOM INVITATION
+            </div>
+
+            {/* Room Title & Code Pill Row */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: '20px',
+                width: '100%',
+              }}
+            >
+              <span
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '13px',
+                  fontSize: '52px',
                   fontWeight: 800,
-                  letterSpacing: '2px',
-                  color: '#E07A5F',
-                  textTransform: 'uppercase',
-                }}
-              >
-                SHARED LISTENING ROOM INVITATION
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '18px',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '44px',
-                    fontWeight: 700,
-                    letterSpacing: '-1px',
-                    color: '#FFFFFF',
-                  }}
-                >
-                  Join Room
-                </span>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    backgroundColor: '#E07A5F',
-                    color: '#1B1B1B',
-                    padding: '8px 24px',
-                    borderRadius: '16px',
-                    fontWeight: 800,
-                    fontSize: '44px',
-                    letterSpacing: '3px',
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  {code}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  fontSize: '20px',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  maxWidth: '820px',
-                  lineHeight: 1.4,
-                  marginTop: '4px',
-                }}
-              >
-                Jam together in real-time sync. Add tracks to the queue and listen with your friends instantly with no sign-up required.
-              </div>
-            </>
-          ) : (
-            <>
-              <div
-                style={{
-                  fontSize: '56px',
-                  fontWeight: 800,
-                  letterSpacing: '-2px',
-                  lineHeight: 1.15,
+                  letterSpacing: '-1px',
                   color: '#FFFFFF',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                Listen to music,{' '}
-                <span style={{ color: '#E07A5F', fontStyle: 'italic', fontWeight: 400 }}>
-                  together.
-                </span>
-              </div>
+                Join Room
+              </span>
+
               <div
                 style={{
-                  fontSize: '21px',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  maxWidth: '800px',
-                  lineHeight: 1.45,
-                  marginTop: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#E07A5F',
+                  color: '#1B1B1B',
+                  padding: '8px 26px',
+                  borderRadius: '16px',
+                  fontWeight: 800,
+                  fontSize: '48px',
+                  letterSpacing: '4px',
+                  fontFamily: 'monospace',
                 }}
               >
-                Collaborative, real-time synchronized music rooms. Create a room, invite your friends, and jam together in sync.
+                {code}
               </div>
-            </>
-          )}
-        </div>
+            </div>
+
+            {/* Subhead description */}
+            <div
+              style={{
+                display: 'flex',
+                fontSize: '21px',
+                color: 'rgba(255, 255, 255, 0.75)',
+                lineHeight: 1.5,
+                maxWidth: '960px',
+              }}
+            >
+              Listen together in perfect sync. Drop tracks into the queue, choose what plays next, and enjoy a seamless listening experience with your friends, all without an account.
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%',
+              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '24px',
+              padding: '48px 52px',
+              gap: '20px',
+              zIndex: 10,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '58px',
+                fontWeight: 800,
+                letterSpacing: '-2px',
+                lineHeight: 1.15,
+                color: '#FFFFFF',
+              }}
+            >
+              <span>Listen to music,</span>
+              <span style={{ color: '#E07A5F', fontStyle: 'italic', fontWeight: 400 }}>
+                together.
+              </span>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                fontSize: '22px',
+                color: 'rgba(255, 255, 255, 0.75)',
+                lineHeight: 1.5,
+                maxWidth: '920px',
+              }}
+            >
+              Collaborative, real-time synchronized music rooms. Create a room, invite your friends, and jam together in sync.
+            </div>
+          </div>
+        )}
 
         {/* Bottom Feature Badges Bar */}
         <div
           style={{
             display: 'flex',
+            flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
             width: '100%',
             paddingTop: '20px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
             zIndex: 10,
           }}
         >
-          {/* Feature 1: Real-time Sync */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
             </svg>
@@ -270,8 +293,7 @@ export async function GET(req: NextRequest) {
             </span>
           </div>
 
-          {/* Feature 2: Works anywhere */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <line x1="2" y1="12" x2="22" y2="12" />
@@ -282,8 +304,7 @@ export async function GET(req: NextRequest) {
             </span>
           </div>
 
-          {/* Feature 3: No login */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -293,8 +314,7 @@ export async function GET(req: NextRequest) {
             </span>
           </div>
 
-          {/* Feature 4: Totally Free */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
