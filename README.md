@@ -32,7 +32,7 @@ graph TD
 
 ## ✦ Core Features & Infrastructure
 
-### 🎵 Listening Experience
+### Listening Experience
 - **Real-Time Audio Sync:** Sub-second track syncing via Socket.IO ensures all participants in a room hear the exact same audio frame.
 - **YouTube Search & Collaborative Queue:** Search for any track or artist. Anyone in the room can queue tracks, while the host retains master playback control.
 - **No Login Required:** Instant guest access—enter your name, copy the 6-character room code, and start playing.
@@ -42,26 +42,26 @@ graph TD
   - `Space` to play/pause.
   - `Escape` to close search overlay.
 
-### 📊 Real-Time Activity Metrics
+### Real-Time Activity Metrics
 - **Live Stat Tiles:** The homepage displays live **Active Rooms** and **Active Listeners** metrics (polling `/rooms/stats` with 10s Redis caching).
 - **Cold-Start Baseline Floor:** To prevent negative social proof during off-peak hours or initial launch, stat tiles maintain a baseline floor (5 active rooms, 10 active listeners) with an animated live pulsing emerald indicator (`bg-emerald-500 animate-pulse`).
 
-### 🛡️ Production Guardrails & Quota Defense
+### Production Guardrails & Quota Defense
 - **24-Hour Search Caching:** Normalized search queries (`search:v3:<query>`) are cached in Redis for 24 hours. Popular music queries hit Redis 99% of the time with 0 API quota usage.
 - **YouTube API Quota Circuit Breaker (`yt:quota_exceeded`):** YouTube Data API v3 enforces a 10,000 unit/day limit (~100 searches/day). On detecting `HTTP 403 Quota Exceeded`, NestJS sets a 1-hour circuit breaker flag in Redis to bypass blocked Google API calls instantly, avoiding 500ms request delays.
 - **Zero-Quota Public Search Engine:** When the YouTube API quota is exhausted, Vynyl automatically falls back to an internal HTML search parser that extracts **real, playable YouTube video IDs, titles, artists, thumbnails, and durations** for ANY query with **0 API quota units**.
 - **Quota-Free Playback:** Audio streaming uses YouTube's IFrame API, which streams directly from YouTube's CDN and consumes **0 API quota units**—ensuring music playback never stops.
 
-### 🚀 Performance & Cold-Start Warmup
+### Performance & Cold-Start Warmup
 - **Zero-Quota `/health` Endpoint:** A lightweight NestJS endpoint returning `{ status: 'ok', uptime }` directly from memory without hitting Redis or YouTube API.
 - **Homepage Pre-Warming:** Opening the web app silently pings `/health` in the background on mount so cold free-tier backend containers (Render/Railway) wake up before the user clicks "Create Room".
 - **24/7 GitHub Actions Keep-Alive:** A background cron workflow (`.github/workflows/keep-alive.yml`) pings `https://vynyl-server.onrender.com/health` every 10 minutes 24/7 so the backend never sleeps.
 
-### 🖼️ Dynamic Social Preview Cards (Open Graph / Twitter)
+### Dynamic Social Preview Cards (Open Graph / Twitter)
 - **Edge OG Image Generator (`/api/og`):** Next.js `ImageResponse` route generating 1200x630 high-definition preview cards rendered in Vynyl's Scandinavian vinyl design system (`#0A0A0E`, `#F6F3EE`, `#E07A5F`, `#C7D1C0`).
 - **Dynamic Room Invitations:** Sharing a room link (`/room/ABCDEF`) on WhatsApp, Discord, Twitter/X, iMessage, or LinkedIn dynamically generates a custom social invitation card displaying the prominent 6-character room code badge (`ABCDEF`) and instant sync details.
 
-### 🔒 Rate Limiting & Throttling
+### Rate Limiting & Throttling
 - **REST Endpoints (`RateLimitGuard`):** Redis sliding-window IP rate limiting:
   - `POST /rooms` (Create Room): Max 5 requests / min per IP (`HTTP 429`).
   - `POST /rooms/:code/join` (Join Room): Max 10 requests / min per IP.
