@@ -574,6 +574,31 @@ function LandingFooter() {
           </div>
         </div>
       </div>
+
+      {/* Center-aligned Page Links */}
+      <div className="max-w-7xl mx-auto pt-6 mt-6 border-t border-[#1B1B1B]/10 flex flex-wrap items-center justify-center gap-6 text-[11px] font-bold text-[#1B1B1B]/60 uppercase tracking-wider">
+        <a href="/about" className="hover:text-[#E07A5F] transition-colors">
+          About
+        </a>
+        <span className="text-[#1B1B1B]/20">•</span>
+        <a
+          href="/sitemap.xml"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-[#E07A5F] transition-colors"
+        >
+          Sitemap
+        </a>
+        <span className="text-[#1B1B1B]/20">•</span>
+        <a
+          href="/robots.txt"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-[#E07A5F] transition-colors"
+        >
+          Robots.txt
+        </a>
+      </div>
     </footer>
   );
 }
