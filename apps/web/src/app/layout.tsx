@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: 'Listen to music together with your friends in real-time sync. vynyl is a zero-login shared room where friends play music, build a queue, and jam together.',
   metadataBase: new URL('https://vynyl-web.vercel.app'),
   verification: {
-    google: 'google512720a9aca22cc6',
+    google: 'nhDt8SrBcrYRr1WzbHP29pslhtdp_TfQ8NrLSlsorL0',
   },
   openGraph: {
     title: 'vynyl — Listen Together ✦',
