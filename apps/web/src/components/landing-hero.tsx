@@ -23,6 +23,13 @@ export function LandingHero() {
 
   useSocket();
 
+  useEffect(() => {
+    // Fire a silent background health check to pre-warm the backend server on initial page load
+    apiFetch('/health').catch(() => {
+      // Ignore background pre-warm errors silently
+    });
+  }, []);
+
   const getDisplayName = () => name.trim() || generateGuestName();
 
   const handleCreateRoom = async () => {

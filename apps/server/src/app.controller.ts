@@ -6,6 +6,7 @@ export class AppController {
   getHealth() {
     return {
       status: 'ok',
+      uptime: Math.floor(process.uptime()),
       timestamp: new Date().toISOString(),
     };
   }
