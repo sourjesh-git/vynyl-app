@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
 import {
+  AppStatsResponse,
   CreateRoomResponse,
   JoinRoomResponse,
   Member,
@@ -165,5 +166,29 @@ export class RoomService {
 
   isHost(room: Room, memberId: string): boolean {
     return room.hostId === memberId;
+  }
+
+  async getStats(): Promise<AppStatsResponse> {
+    const cached = await this.redis.get<AppStatsResponse>('app:stats');
+    if (cached) return cached;
+
+    const roomKeys = await this.redis.client.keys('room:*');
+    let rawActiveRooms = roomKeys.length;
+    let rawActiveListeners = 0;
+
+    for (const key of roomKeys) {
+      const room = await this.redis.get<Room>(key);
+      if (room && Array.isArray(room.members)) {
+        rawActiveListeners += room.members.length;
+      }
+    }
+
+    const stats: AppStatsResponse = {
+      activeRooms: rawActiveRooms,
+      activeListeners: rawActiveListeners,
+    };
+
+    await this.redis.set('app:stats', stats, 10);
+    return stats;
   }
 }

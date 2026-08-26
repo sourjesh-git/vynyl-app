@@ -11,12 +11,17 @@ import { RedisService } from './redis.service';
       useFactory: (config: ConfigService) => {
         const logger = new Logger('RedisModule');
         const url = config.get<string>('REDIS_URL');
+        const isTls = url?.startsWith('rediss://') || url?.includes('upstash.io');
         const client = url
-          ? new Redis(url)
+          ? new Redis(url, {
+              tls: isTls ? { rejectUnauthorized: false } : undefined,
+              maxRetriesPerRequest: null,
+            })
           : new Redis({
               host: config.get('REDIS_HOST', 'localhost'),
               port: config.get<number>('REDIS_PORT', 6379),
               password: config.get('REDIS_PASSWORD') || undefined,
+              maxRetriesPerRequest: null,
             });
 
         client.on('connect', () => {

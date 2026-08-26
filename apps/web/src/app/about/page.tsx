@@ -65,7 +65,7 @@ export default function AboutPage() {
               Why vynyl?
             </h2>
             <p>
-              Sharing music should be effortless. Many platforms force users through sign-ups, paywalls, or separate mobile app installations just to share a single track. And don't get me started on starting a whole Gmeet just to listen to music with your friends, because who wants to do that anymore?
+              Sharing music should be effortless. Many platforms force users through sign-ups, paywalls, or separate mobile app installations just to share a single track. And don't even mention on starting a whole Gmeet just to listen to music with your friends, because who wants to do that anymore?
             </p>
             <p>
               I made vynyl to serve as a lightweight, zero-friction web alternative. By using YouTube's extensive (and free!) API, you can create or join a synchronized room instantly with nothing more than a browser tab and a guest name.

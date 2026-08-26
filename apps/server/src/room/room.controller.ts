@@ -41,6 +41,11 @@ export class RoomController {
     }
   }
 
+  @Get('stats')
+  async getStats() {
+    return this.roomService.getStats();
+  }
+
   @Get(':code')
   async getRoom(@Param('code') code: string) {
     try {

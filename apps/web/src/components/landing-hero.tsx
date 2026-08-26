@@ -11,6 +11,7 @@ import { useSocket } from '@/hooks/use-socket';
 import { toast } from '@/hooks/use-toast';
 import type { CreateRoomResponse } from '@syncroom/shared';
 import { motion, AnimatePresence } from 'framer-motion';
+import { StatsTiles } from '@/components/stats-tiles';
 
 export function LandingHero() {
   const router = useRouter();
@@ -366,6 +367,9 @@ export function LandingHero() {
                 </div>
               </div>
             </div>
+
+            {/* Live Stats Tiles (Active Rooms & Active Listeners) */}
+            <StatsTiles />
           </div>
 
           {/* Bottom spacer for layout alignment on desktop */}

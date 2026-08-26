@@ -41,6 +41,11 @@ export interface JoinRoomResponse {
   currentIndex?: number;
 }
 
+export interface AppStatsResponse {
+  activeRooms: number;
+  activeListeners: number;
+}
+
 export const ROOM_TTL_SECONDS = 60 * 60;
 export const HOST_DISCONNECT_TIMEOUT_MS = 60_000;
 export const PRESENCE_HEARTBEAT_INTERVAL_MS = 30_000;
