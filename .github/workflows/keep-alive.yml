@@ -1,0 +1,22 @@
+name: Server Cold-Start Keep-Alive
+
+on:
+  schedule:
+    # Run every 10 minutes (Cron format: minute hour day month day-of-week)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ping-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping NestJS Backend Health Endpoint
+        run: |
+          echo "Pinging Vynyl Server at $(date -u)"
+          response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 15 "https://vynyl-server.onrender.com/health")
+          echo "$response"
+          if [[ "$response" == *"HTTP_STATUS:200"* ]]; then
+            echo "✅ Backend server is warm and healthy!"
+          else
+            echo "⚠️ Server ping returned non-200 response or timed out."
+          fi
