@@ -13,6 +13,7 @@ import {
   ClientToServerEvents,
   JoinRoomAck,
   QueueItem,
+  RepeatMode,
   ServerToClientEvents,
 } from '@syncroom/shared';
 import { RoomService } from '../room/room.service';
@@ -276,7 +277,9 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!(await this.assertHost(client, data.code))) return;
 
     this.logger.log(`Room ${data.code.toUpperCase()}: Advancing to next track`);
-    const { state, item } = await this.queueService.advanceQueue(data.code);
+    const room = await this.roomService.getRoom(data.code).catch(() => null);
+    const repeatMode = room?.playback?.repeatMode ?? 'off';
+    const { state, item } = await this.queueService.advanceQueue(data.code, repeatMode);
     this.server.to(data.code.toUpperCase()).emit('queue-updated', {
       items: state.items,
       currentIndex: state.currentIndex,
@@ -285,10 +288,12 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (item) {
       this.logger.log(`Room ${data.code.toUpperCase()}: Next track is "${item.title}"`);
       const playback = await this.syncService.loadTrack(data.code, item);
+      playback.repeatMode = repeatMode;
       this.broadcastPlayback(data.code, playback);
     } else {
       this.logger.log(`Room ${data.code.toUpperCase()}: Queue empty, stopping playback`);
       const playback = await this.syncService.stop(data.code);
+      playback.repeatMode = repeatMode;
       this.broadcastPlayback(data.code, playback);
     }
   }
@@ -338,14 +343,19 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const state = await this.queueService.addItem(data.code, item);
     const room = await this.roomService.getRoom(data.code);
+    const isHostUser = this.roomService.isHost(room, info.memberId);
 
     if (!room.playback.videoId && state.currentIndex >= 0) {
       const current = state.items[state.currentIndex];
-      if (current && (await this.assertHost(client, data.code))) {
+      if (current) {
         this.logger.log(`Room ${data.code.toUpperCase()}: Queue was empty, loading added track automatically`);
         const playback = await this.syncService.loadTrack(data.code, current);
         this.broadcastPlayback(data.code, playback);
       }
+    }
+
+    if (!isHostUser) {
+      client.emit('info', { message: 'Track added to queue! Host controls playback start.' });
     }
 
     this.server.to(data.code.toUpperCase()).emit('queue-updated', {
@@ -383,6 +393,58 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(data.code.toUpperCase()).emit('queue-updated', {
       items: state.items,
       currentIndex: state.currentIndex,
+    });
+  }
+
+  @SubscribeMessage('queue-shuffle')
+  async handleQueueShuffle(
+    @ConnectedSocket() client: AppSocket,
+    @MessageBody() data: { code: string },
+  ) {
+    if (!(await this.assertHost(client, data.code))) return;
+    const info = this.socketMembers.get(client.id);
+    if (!info) return;
+
+    this.logger.log(`Room ${data.code.toUpperCase()}: Shuffling upcoming queue items`);
+    const state = await this.queueService.shuffleQueue(data.code);
+    const room = await this.roomService.getRoom(data.code);
+    const member = room.members.find((m) => m.id === info.memberId);
+    const isHost = room.hostId === info.memberId;
+    const name = isHost ? 'Host' : (member?.name ?? 'Someone');
+
+    this.server.to(data.code.toUpperCase()).emit('queue-updated', {
+      items: state.items,
+      currentIndex: state.currentIndex,
+    });
+    this.server.to(data.code.toUpperCase()).emit('queue-shuffled', {
+      memberId: info.memberId,
+      memberName: name,
+    });
+  }
+
+  @SubscribeMessage('set-repeat')
+  async handleSetRepeat(
+    @ConnectedSocket() client: AppSocket,
+    @MessageBody() data: { code: string; mode: RepeatMode },
+  ) {
+    if (!(await this.assertHost(client, data.code))) return;
+    const info = this.socketMembers.get(client.id);
+    if (!info) return;
+
+    this.logger.log(`Room ${data.code.toUpperCase()}: Setting repeat mode to "${data.mode}"`);
+    const room = await this.roomService.getRoom(data.code);
+    const member = room.members.find((m) => m.id === info.memberId);
+    const isHost = room.hostId === info.memberId;
+    const name = isHost ? 'Host' : (member?.name ?? 'Someone');
+
+    room.playback.repeatMode = data.mode;
+    await this.roomService.saveRoom(room);
+    this.broadcastPlayback(data.code, room.playback);
+
+    this.server.to(data.code.toUpperCase()).emit('repeat-changed', {
+      memberId: info.memberId,
+      memberName: name,
+      mode: data.mode,
     });
   }
 

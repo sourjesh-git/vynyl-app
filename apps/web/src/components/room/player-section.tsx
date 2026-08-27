@@ -11,12 +11,15 @@ import {
   VolumeX,
   Shuffle,
   Repeat,
+  Repeat1,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRoomStore, useIsHost } from '@/store/room-store';
 import { useYouTubePlayer } from '@/hooks/use-youtube-player';
 import { formatDuration } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
+import type { RepeatMode } from '@syncroom/shared';
 import { motion } from 'framer-motion';
 
 const PLAYER_ID = 'syncroom-yt-player';
@@ -93,6 +96,23 @@ export function PlayerSection() {
     if (!isHost || !room?.code) return;
     const socket = useRoomStore.getState().socket;
     socket?.emit('playback-prev', { code: room.code });
+  };
+
+  const handleShuffle = () => {
+    if (!isHost || !room?.code) return;
+    const socket = useRoomStore.getState().socket;
+    socket?.emit('queue-shuffle', { code: room.code });
+  };
+
+  const currentRepeatMode = playback?.repeatMode ?? 'off';
+
+  const handleRepeatToggle = () => {
+    if (!isHost || !room?.code) return;
+    const socket = useRoomStore.getState().socket;
+    const modes: RepeatMode[] = ['off', 'all', 'one'];
+    const nextIdx = (modes.indexOf(currentRepeatMode) + 1) % modes.length;
+    const nextMode = modes[nextIdx];
+    socket?.emit('set-repeat', { code: room.code, mode: nextMode });
   };
 
   if (!playback?.videoId) {
@@ -207,11 +227,13 @@ export function PlayerSection() {
           {/* Controls bar (Play/Pause, Prev, Next, Shuffle, Repeat) */}
           <div className="flex items-center justify-center sm:justify-start lg:justify-center xl:justify-start gap-5 pt-1">
             <button
+              onClick={handleShuffle}
+              disabled={!isHost}
+              title="Shuffle Queue"
               className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${isHost
-                ? 'bg-[#1B1B1B] text-white hover:bg-black'
+                ? 'bg-[#1B1B1B] text-white hover:bg-black hover:scale-105'
                 : 'bg-[#1B1B1B]/15 text-[#1B1B1B]/40 cursor-not-allowed'
                 }`}
-              onClick={() => isHost && setShuffle(!shuffle)}
             >
               <Shuffle className="h-4.5 w-4.5 fill-current" />
             </button>
@@ -258,15 +280,30 @@ export function PlayerSection() {
               <SkipForward className="h-4.5 w-4.5 fill-current" />
             </button>
 
-            {/* Repeat Button */}
+            {/* Repeat Button (Off / All / One) */}
             <button
-              onClick={() => setRepeat(!repeat)}
-              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${repeat
-                ? 'bg-[#E07A5F] text-white hover:bg-[#E07A5F]/90'
-                : 'bg-[#1B1B1B] text-white hover:bg-black'
-                }`}
+              onClick={handleRepeatToggle}
+              disabled={!isHost}
+              title={
+                currentRepeatMode === 'one'
+                  ? 'Repeat One'
+                  : currentRepeatMode === 'all'
+                  ? 'Repeat All'
+                  : 'Repeat Off'
+              }
+              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${
+                !isHost
+                  ? 'bg-[#1B1B1B]/15 text-[#1B1B1B]/40 cursor-not-allowed'
+                  : currentRepeatMode !== 'off'
+                  ? 'bg-[#E07A5F] text-white hover:bg-[#E07A5F]/90 shadow-md scale-105'
+                  : 'bg-[#1B1B1B] text-white hover:bg-black'
+              }`}
             >
-              <Repeat className="h-4.5 w-4.5" />
+              {currentRepeatMode === 'one' ? (
+                <Repeat1 className="h-4.5 w-4.5" />
+              ) : (
+                <Repeat className="h-4.5 w-4.5" />
+              )}
             </button>
           </div>
         </div>

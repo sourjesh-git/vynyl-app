@@ -124,7 +124,9 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
                     "h-1.5 w-1.5 rounded-full shrink-0 animate-pulse",
                     event.type === 'join' && "bg-[#52B788]",
                     event.type === 'leave' && "bg-red-400",
-                    event.type === 'queue-add' && "bg-orange-400"
+                    event.type === 'queue-add' && "bg-orange-400",
+                    event.type === 'shuffle' && "bg-purple-500",
+                    event.type === 'repeat' && "bg-blue-500"
                   )} />
                   <span className="text-[#1B1B1B]/75 truncate">{event.text}</span>
                 </div>

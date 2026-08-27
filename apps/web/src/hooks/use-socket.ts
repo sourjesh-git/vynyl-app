@@ -136,8 +136,29 @@ export function useSocket() {
         new CustomEvent('syncroom:sync', { detail: data }),
       );
     });
+    socket.on('queue-shuffled', (data) => {
+      useRoomStore.getState().addEvent({
+        type: 'shuffle',
+        text: `${data.memberName} shuffled queue`,
+      });
+    });
+    socket.on('repeat-changed', (data) => {
+      const modeLabel =
+        data.mode === 'one'
+          ? 'Repeat One'
+          : data.mode === 'all'
+          ? 'Repeat All'
+          : 'Repeat Off';
+      useRoomStore.getState().addEvent({
+        type: 'repeat',
+        text: `${data.memberName} set ${modeLabel}`,
+      });
+    });
     socket.on('error', (data) => {
       toast({ title: 'Error', description: data.message, variant: 'destructive' });
+    });
+    socket.on('info', (data) => {
+      toast({ title: 'Notice', description: data.message });
     });
 
     return () => {

@@ -1,5 +1,7 @@
 import type { QueueItem } from './queue-types';
 
+export type RepeatMode = 'off' | 'all' | 'one';
+
 export interface Member {
   id: string;
   name: string;
@@ -17,6 +19,7 @@ export interface PlaybackState {
   positionMs: number;
   startedAt: number | null;
   addedBy: string | null;
+  repeatMode?: RepeatMode;
 }
 
 export interface Room {
