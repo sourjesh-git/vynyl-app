@@ -11,6 +11,7 @@ import { MembersSection } from '@/components/room/members-section';
 import { Avatar } from '@/components/avatar';
 import { useRoomStore } from '@/store/room-store';
 import { useSocket } from '@/hooks/use-socket';
+import { useDynamicTitle } from '@/hooks/use-dynamic-title';
 import { apiFetch } from '@/lib/api';
 import { generateGuestName } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
@@ -36,6 +37,7 @@ export function RoomPage({ code }: { code: string }) {
     useRoomStore();
 
   useSocket();
+  useDynamicTitle();
 
   // Mobile layout active tab state
   const [activeTab, setActiveTab] = useState<'player' | 'queue' | 'members' | 'search'>('player');
