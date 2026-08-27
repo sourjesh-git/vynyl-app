@@ -12,7 +12,7 @@ export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 export interface RoomEvent {
   id: string;
-  type: 'join' | 'leave' | 'queue-add';
+  type: 'join' | 'leave' | 'queue-add' | 'shuffle' | 'repeat';
   text: string;
   timestamp: number;
 }

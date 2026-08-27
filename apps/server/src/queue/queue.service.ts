@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
-import { QueueItem, QueueState, ROOM_TTL_SECONDS } from '@syncroom/shared';
+import { QueueItem, QueueState, RepeatMode, ROOM_TTL_SECONDS } from '@syncroom/shared';
 import { RedisService } from '../redis/redis.service';
 
 const generateId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 12);
@@ -88,6 +88,25 @@ export class QueueService {
     return state;
   }
 
+  async shuffleQueue(code: string): Promise<QueueState> {
+    const state = await this.getQueue(code);
+    if (state.items.length <= 1) return state;
+
+    const currentIdx = state.currentIndex >= 0 ? state.currentIndex : 0;
+    const pastItems = state.items.slice(0, currentIdx + 1);
+    const upcomingItems = state.items.slice(currentIdx + 1);
+
+    // Fisher-Yates Shuffle on upcoming tracks
+    for (let i = upcomingItems.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [upcomingItems[i], upcomingItems[j]] = [upcomingItems[j], upcomingItems[i]];
+    }
+
+    state.items = [...pastItems, ...upcomingItems];
+    await this.saveQueue(code, state);
+    return state;
+  }
+
   getCurrentItem(state: QueueState): QueueItem | null {
     if (state.currentIndex < 0 || state.currentIndex >= state.items.length) {
       return null;
@@ -95,16 +114,32 @@ export class QueueService {
     return state.items[state.currentIndex];
   }
 
-  async advanceQueue(code: string): Promise<{ state: QueueState; item: QueueItem | null }> {
+  async advanceQueue(
+    code: string,
+    repeatMode: RepeatMode = 'off',
+  ): Promise<{ state: QueueState; item: QueueItem | null }> {
     const state = await this.getQueue(code);
     if (state.items.length === 0) {
       return { state, item: null };
     }
 
-    if (state.currentIndex < state.items.length - 1) {
-      state.currentIndex += 1;
+    if (repeatMode === 'one') {
+      // Keep current index, replay track
+      if (state.currentIndex < 0) state.currentIndex = 0;
+    } else if (repeatMode === 'all') {
+      // Loop back to start if at end
+      if (state.currentIndex < state.items.length - 1) {
+        state.currentIndex += 1;
+      } else {
+        state.currentIndex = 0;
+      }
     } else {
-      state.currentIndex = -1;
+      // 'off': Stop when queue ends
+      if (state.currentIndex < state.items.length - 1) {
+        state.currentIndex += 1;
+      } else {
+        state.currentIndex = -1;
+      }
     }
 
     await this.saveQueue(code, state);

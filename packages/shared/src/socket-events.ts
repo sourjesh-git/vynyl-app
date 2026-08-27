@@ -1,4 +1,4 @@
-import type { Member, PlaybackState, Room } from './room-types';
+import type { Member, PlaybackState, RepeatMode, Room } from './room-types';
 import type { QueueItem } from './queue-types';
 import type { SearchResult } from './search-types';
 
@@ -22,6 +22,8 @@ export interface ClientToServerEvents {
   'queue-add': (data: { code: string; item: Omit<QueueItem, 'id' | 'addedAt'> }) => void;
   'queue-remove': (data: { code: string; itemId: string }) => void;
   'queue-reorder': (data: { code: string; fromIndex: number; toIndex: number }) => void;
+  'queue-shuffle': (data: { code: string }) => void;
+  'set-repeat': (data: { code: string; mode: RepeatMode }) => void;
   heartbeat: (data: { code: string; memberId: string; positionMs?: number }) => void;
 }
 
@@ -34,7 +36,10 @@ export interface ServerToClientEvents {
   'queue-updated': (data: { items: QueueItem[]; currentIndex: number }) => void;
   'room-state': (data: { room: Room; queue: QueueItem[]; currentIndex: number }) => void;
   sync: (data: { positionMs: number; playing: boolean; startedAt: number | null }) => void;
+  'queue-shuffled': (data: { memberId: string; memberName: string }) => void;
+  'repeat-changed': (data: { memberId: string; memberName: string; mode: RepeatMode }) => void;
   error: (data: { message: string }) => void;
+  info: (data: { message: string }) => void;
 }
 
 export interface CreateRoomAck {

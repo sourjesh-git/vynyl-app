@@ -12,9 +12,9 @@ export function useDynamicTitle() {
     const isPlaying = playback?.playing;
 
     if (title && isPlaying) {
-      document.title = `▶ ${title} — vynyl`;
+      document.title = `► ${title} ✦ vynyl`;
     } else if (title && !isPlaying) {
-      document.title = `⏸ ${title} — vynyl`;
+      document.title = `II ${title} ✦ vynyl`;
     } else {
       document.title = 'vynyl — Listen Together ✦';
     }
