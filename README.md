@@ -7,6 +7,8 @@ Collaborative, real-time synchronized music rooms. Create a room, invite your fr
 Live Web App: **[vynyl-web.vercel.app](https://vynyl-web.vercel.app)**  
 Live API Server: **[vynyl-server.onrender.com](https://vynyl-server.onrender.com)**
 
+> 💡 **Looking to understand how Vynyl handles real-world scenarios?** Check out [ARCHITECTURE.md](ARCHITECTURE.md) for a technical deep dive into real-time audio synchronization algorithms, clock drift handling, host disconnect grace periods, and distributed scaling decisions.
+
 ---
 
 ## ✦ System Architecture
