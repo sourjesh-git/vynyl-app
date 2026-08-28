@@ -99,6 +99,9 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
 
   addQueueItemOptimistic: (item) =>
     set((state) => {
+      if (state.queue.some((i) => i.videoId === item.videoId)) {
+        return state;
+      }
       const newItem: QueueItem = {
         ...item,
         id: `optimistic-${Date.now()}`,

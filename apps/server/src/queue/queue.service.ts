@@ -27,6 +27,10 @@ export class QueueService {
     item: Omit<QueueItem, 'id' | 'addedAt'>,
   ): Promise<QueueState> {
     const state = await this.getQueue(code);
+    const exists = state.items.some((i) => i.videoId === item.videoId);
+    if (exists) {
+      throw new Error('This track is already in the queue');
+    }
     const newItem: QueueItem = {
       ...item,
       id: generateId(),

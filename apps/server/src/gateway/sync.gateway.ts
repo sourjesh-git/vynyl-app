@@ -341,27 +341,33 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
       addedBy: info.memberId,
     };
 
-    const state = await this.queueService.addItem(data.code, item);
-    const room = await this.roomService.getRoom(data.code);
-    const isHostUser = this.roomService.isHost(room, info.memberId);
+    try {
+      const state = await this.queueService.addItem(data.code, item);
+      const room = await this.roomService.getRoom(data.code);
+      const isHostUser = this.roomService.isHost(room, info.memberId);
 
-    if (!room.playback.videoId && state.currentIndex >= 0) {
-      const current = state.items[state.currentIndex];
-      if (current) {
-        this.logger.log(`Room ${data.code.toUpperCase()}: Queue was empty, loading added track automatically`);
-        const playback = await this.syncService.loadTrack(data.code, current);
-        this.broadcastPlayback(data.code, playback);
+      if (!room.playback.videoId && state.currentIndex >= 0) {
+        const current = state.items[state.currentIndex];
+        if (current) {
+          this.logger.log(`Room ${data.code.toUpperCase()}: Queue was empty, loading added track automatically`);
+          const playback = await this.syncService.loadTrack(data.code, current);
+          this.broadcastPlayback(data.code, playback);
+        }
       }
-    }
 
-    if (!isHostUser) {
-      client.emit('info', { message: 'Track added to queue! Host controls playback start.' });
-    }
+      if (!isHostUser) {
+        client.emit('info', { message: 'Track added to queue! Host controls playback start.' });
+      }
 
-    this.server.to(data.code.toUpperCase()).emit('queue-updated', {
-      items: state.items,
-      currentIndex: state.currentIndex,
-    });
+      this.server.to(data.code.toUpperCase()).emit('queue-updated', {
+        items: state.items,
+        currentIndex: state.currentIndex,
+      });
+    } catch (err) {
+      client.emit('error', {
+        message: err instanceof Error ? err.message : 'This track is already in the queue',
+      });
+    }
   }
 
   @SubscribeMessage('queue-remove')

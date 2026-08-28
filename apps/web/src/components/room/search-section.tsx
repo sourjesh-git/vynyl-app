@@ -9,6 +9,7 @@ import { useRoomStore } from '@/store/room-store';
 import { formatDuration, cn } from '@/lib/utils';
 import type { SearchResult } from '@syncroom/shared';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 
 export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
@@ -62,8 +63,18 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [results, activeResultIndex, isMobile]);
 
+  const queue = useRoomStore((s) => s.queue);
+
   const addToQueue = (result: SearchResult) => {
     if (!room?.code || !socket || !memberId) return;
+
+    if (queue.some((i) => i.videoId === result.videoId)) {
+      toast({
+        title: 'Already in Queue',
+        description: `"${result.title}" is already added!`,
+      });
+      return;
+    }
 
     const item = {
       videoId: result.videoId,
@@ -123,7 +134,8 @@ export function SearchSection({ isMobile = false }: { isMobile?: boolean }) {
     return (
       <div className="space-y-2.5">
         {results?.map((result, idx) => {
-          const isAdded = addedItemIds[result.videoId];
+          const isInQueue = queue.some((i) => i.videoId === result.videoId);
+          const isAdded = addedItemIds[result.videoId] || isInQueue;
           const isActive = idx === activeResultIndex;
 
           return (
