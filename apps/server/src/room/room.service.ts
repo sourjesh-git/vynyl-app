@@ -102,6 +102,16 @@ export class RoomService {
     };
   }
 
+  async updateMemberName(code: string, memberId: string, name: string): Promise<Room> {
+    const room = await this.getRoom(code);
+    const member = room.members.find((m) => m.id === memberId);
+    if (!member) throw new NotFoundException('Member not found');
+
+    member.name = name.trim() || member.name;
+    await this.saveRoom(room);
+    return room;
+  }
+
   async removeMember(code: string, memberId: string): Promise<Room | null> {
     const room = await this.redis.get<Room>(this.roomKey(code));
     if (!room) return null;

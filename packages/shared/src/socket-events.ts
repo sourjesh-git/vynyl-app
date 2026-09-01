@@ -24,6 +24,7 @@ export interface ClientToServerEvents {
   'queue-reorder': (data: { code: string; fromIndex: number; toIndex: number }) => void;
   'queue-shuffle': (data: { code: string }) => void;
   'set-repeat': (data: { code: string; mode: RepeatMode }) => void;
+  'update-name': (data: { code: string; name: string }) => void;
   heartbeat: (data: { code: string; memberId: string; positionMs?: number }) => void;
 }
 
@@ -31,6 +32,7 @@ export interface ClientToServerEvents {
 export interface ServerToClientEvents {
   'member-joined': (data: { member: Member }) => void;
   'member-left': (data: { memberId: string }) => void;
+  'member-renamed': (data: { memberId: string; name: string }) => void;
   'host-changed': (data: { hostId: string; member: Member }) => void;
   'playback-updated': (data: { playback: PlaybackState }) => void;
   'queue-updated': (data: { items: QueueItem[]; currentIndex: number }) => void;

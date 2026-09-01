@@ -46,7 +46,7 @@ export function LandingHero() {
         router.push(
           `/room/${restResult.code}?memberId=${restResult.memberId}&name=${encodeURIComponent(
             restResult.memberName
-          )}`
+          )}&created=true`
         );
         return;
       }
@@ -69,12 +69,12 @@ export function LandingHero() {
             console.error(e);
           }
 
-          router.push(`/room/${response.room.code}`);
+          router.push(`/room/${response.room.code}?created=true`);
         } else {
           router.push(
             `/room/${restResult.code}?memberId=${restResult.memberId}&name=${encodeURIComponent(
               restResult.memberName
-            )}`
+            )}&created=true`
           );
         }
       });

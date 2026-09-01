@@ -52,11 +52,10 @@ export function QueueSection({ isMobile = false }: { isMobile?: boolean }) {
                 mass: 0.8,
               }}
               onClick={() => playItem(index)}
-              className={`flex items-center justify-between gap-3 rounded-2xl p-2.5 transition-all border group/queue-item cursor-pointer ${
-                isCurrent
+              className={`flex items-center justify-between gap-3 rounded-2xl p-2.5 transition-all border group/queue-item cursor-pointer ${isCurrent
                   ? 'bg-white/60 border-white/80 shadow-sm'
                   : 'border-transparent hover:bg-white/20'
-              }`}
+                }`}
             >
               {/* Left indicator: Soundwave lines or Index */}
               <div className="flex items-center justify-center shrink-0 w-6">
@@ -174,12 +173,6 @@ export function QueueSection({ isMobile = false }: { isMobile?: boolean }) {
           {renderQueueList()}
         </div>
       )}
-
-      <div className="pt-2 border-t border-black/5 mt-auto text-center">
-        <span className="text-[11px] font-bold text-[#E07A5F] hover:text-[#E07A5F]/80 tracking-wider uppercase transition-colors inline-flex items-center gap-1 cursor-pointer">
-          View full queue →
-        </span>
-      </div>
     </div>
   );
 }

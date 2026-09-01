@@ -131,6 +131,9 @@ export function useSocket() {
       removeMember(data.memberId);
     });
     socket.on('host-changed', (data) => setHost(data.hostId, data.member));
+    socket.on('member-renamed', (data) => {
+      useRoomStore.getState().updateMemberName(data.memberId, data.name);
+    });
     socket.on('sync', (data) => {
       window.dispatchEvent(
         new CustomEvent('syncroom:sync', { detail: data }),

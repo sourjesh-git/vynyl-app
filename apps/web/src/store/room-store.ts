@@ -44,6 +44,7 @@ interface RoomStore {
   setQueue: (queue: QueueItem[], currentIndex: number) => void;
   addQueueItemOptimistic: (item: Omit<QueueItem, 'id' | 'addedAt'>) => void;
   addMember: (member: Member) => void;
+  updateMemberName: (memberId: string, name: string) => void;
   removeMember: (memberId: string) => void;
   setHost: (hostId: string, member: Member) => void;
   setSearchOpen: (open: boolean) => void;
@@ -119,6 +120,29 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
       if (state.room.members.some((m) => m.id === member.id)) return state;
       return {
         room: { ...state.room, members: [...state.room.members, member] },
+      };
+    }),
+
+  updateMemberName: (memberId, name) =>
+    set((state) => {
+      if (!state.room) return state;
+      const updatedMembers = state.room.members.map((m) =>
+        m.id === memberId ? { ...m, name } : m
+      );
+      const isSelf = memberId === state.memberId;
+      if (isSelf && state.room.code) {
+        try {
+          localStorage.setItem(
+            `vynyl_room_${state.room.code.toUpperCase()}`,
+            JSON.stringify({ memberId, name })
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      return {
+        room: { ...state.room, members: updatedMembers },
+        memberName: isSelf ? name : state.memberName,
       };
     }),
 
