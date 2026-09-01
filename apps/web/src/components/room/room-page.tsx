@@ -7,6 +7,8 @@ import { SearchSection } from '@/components/room/search-section';
 import { QueueSection } from '@/components/room/queue-section';
 import { MembersSection } from '@/components/room/members-section';
 import { InviteModal } from '@/components/room/invite-modal';
+import { SessionModal } from '@/components/room/session-modal';
+import type { SessionSummary } from '@/components/room/session-card';
 import { Avatar } from '@/components/avatar';
 import { useRoomStore } from '@/store/room-store';
 import { useSocket } from '@/hooks/use-socket';
@@ -43,14 +45,86 @@ export function RoomPage({ code }: { code: string }) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
 
+  // Session Memory Card tracking
+  const sessionJoinedAtRef = useRef<number>(Date.now());
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const queue = useRoomStore((s) => s.queue);
+
+  const handleConfirmLeave = () => {
+    setShowLeaveModal(false);
+    const socket = useRoomStore.getState().socket;
+    if (socket && room?.code) {
+      socket.emit('leave-room', { code: room.code });
+    }
+    if (room?.code) {
+      try {
+        localStorage.removeItem(`vynyl_room_${room.code.toUpperCase()}`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    useRoomStore.getState().reset();
+    router.push('/');
+  };
+
+  const playback = useRoomStore((s) => s.playback);
+  const currentIndex = useRoomStore((s) => s.currentIndex);
+
+  const getRecentTracks = (): Array<{ title: string; artist: string }> => {
+    const tracks: Array<{ title: string; artist: string }> = [];
+
+    // Current / Last played song
+    if (playback?.title) {
+      tracks.push({ title: playback.title, artist: playback.artist || 'Unknown' });
+    } else if (currentIndex >= 0 && queue[currentIndex]) {
+      tracks.push({ title: queue[currentIndex].title, artist: queue[currentIndex].artist });
+    } else if (queue.length > 0) {
+      tracks.push({ title: queue[0].title, artist: queue[0].artist });
+    }
+
+    // 1-2 Songs played before (or adjacent in queue)
+    if (currentIndex > 0) {
+      for (let i = currentIndex - 1; i >= Math.max(0, currentIndex - 2); i--) {
+        if (queue[i] && !tracks.some((t) => t.title === queue[i].title)) {
+          tracks.push({ title: queue[i].title, artist: queue[i].artist });
+        }
+      }
+    } else if (queue.length > 1) {
+      for (let i = 1; i < Math.min(queue.length, 3); i++) {
+        if (queue[i] && !tracks.some((t) => t.title === queue[i].title)) {
+          tracks.push({ title: queue[i].title, artist: queue[i].artist });
+        }
+      }
+    }
+
+    return tracks;
+  };
+
+  const otherParticipants = (room?.members ?? [])
+    .filter((m) => m.id !== memberId)
+    .map((m) => m.name);
+
+  const sessionSummary: SessionSummary = {
+    durationMs: Math.max(0, Date.now() - sessionJoinedAtRef.current),
+    startedAt: new Date(sessionJoinedAtRef.current),
+    participants: otherParticipants,
+    songsPlayed: Math.max(1, queue.length),
+    recentTracks: getRecentTracks(),
+  };
+
   useEffect(() => {
     if (searchParams.get('created') === 'true') {
       setShowInviteModal(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (showInviteModal && room?.code && memberId && searchParams.get('created') === 'true') {
       const url = new URL(window.location.href);
       url.searchParams.delete('created');
       window.history.replaceState(null, '', url.toString());
     }
-  }, [searchParams]);
+  }, [showInviteModal, room?.code, memberId, searchParams]);
 
   useEffect(() => {
     if (joinedRef.current || (room?.code === code.toUpperCase() && memberId)) return;
@@ -233,6 +307,11 @@ export function RoomPage({ code }: { code: string }) {
             Connecting and joining room...
           </p>
         </div>
+        <InviteModal
+          code={code}
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+        />
       </div>
     );
   }
@@ -263,7 +342,10 @@ export function RoomPage({ code }: { code: string }) {
       <div className="hidden lg:flex flex-1 w-full min-h-screen overflow-hidden">
         {/* LEFT COLUMN: Sidebar (Vynyl Brand, Code copy, Members, Invite) */}
         <aside className="lg:w-64 xl:w-72 shrink-0">
-          <MembersSection onOpenInvite={() => setShowInviteModal(true)} />
+          <MembersSection
+            onOpenInvite={() => setShowInviteModal(true)}
+            onOpenLeave={() => setShowLeaveModal(true)}
+          />
         </aside>
 
         {/* RIGHT MAIN AREA: Core content + Header + Queue side column */}
@@ -448,7 +530,11 @@ export function RoomPage({ code }: { code: string }) {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                <MembersSection isMobile={true} onOpenInvite={() => setShowInviteModal(true)} />
+                <MembersSection
+                  isMobile={true}
+                  onOpenInvite={() => setShowInviteModal(true)}
+                  onOpenLeave={() => setShowLeaveModal(true)}
+                />
               </motion.div>
             )}
 
@@ -524,6 +610,14 @@ export function RoomPage({ code }: { code: string }) {
         code={code}
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
+      />
+
+      {/* Session Memory Souvenir Modal */}
+      <SessionModal
+        isOpen={showLeaveModal}
+        summary={sessionSummary}
+        onConfirmLeave={handleConfirmLeave}
+        onStay={() => setShowLeaveModal(false)}
       />
     </div>
   );
