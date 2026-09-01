@@ -454,6 +454,26 @@ export class SyncGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
+  @SubscribeMessage('update-name')
+  async handleUpdateName(
+    @ConnectedSocket() client: AppSocket,
+    @MessageBody() data: { code: string; name: string },
+  ) {
+    const info = this.socketMembers.get(client.id);
+    if (!info) return;
+
+    const trimmed = data.name.trim();
+    if (!trimmed || trimmed.length > 32) return;
+
+    this.logger.log(`Room ${data.code.toUpperCase()}: Member ${info.memberId} renaming to "${trimmed}"`);
+    await this.roomService.updateMemberName(data.code, info.memberId, trimmed);
+
+    this.server.to(data.code.toUpperCase()).emit('member-renamed', {
+      memberId: info.memberId,
+      name: trimmed,
+    });
+  }
+
   @SubscribeMessage('heartbeat')
   async handleHeartbeat(
     @ConnectedSocket() client: AppSocket,

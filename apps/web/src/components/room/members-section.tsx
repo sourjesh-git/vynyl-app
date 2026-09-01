@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Copy, Check, Users, UserPlus } from 'lucide-react';
+import { Copy, Check, Users, UserPlus, Pencil, X } from 'lucide-react';
 import { useRoomStore } from '@/store/room-store';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Avatar } from '@/components/avatar';
+import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 function formatEventTime(timestamp: number): string {
@@ -15,7 +16,13 @@ function formatEventTime(timestamp: number): string {
   return `${diffMins}m`;
 }
 
-export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
+export function MembersSection({
+  isMobile = false,
+  onOpenInvite,
+}: {
+  isMobile?: boolean;
+  onOpenInvite?: () => void;
+}) {
   const room = useRoomStore((s) => s.room);
   const memberId = useRoomStore((s) => s.memberId);
   const events = useRoomStore((s) => s.events);
@@ -43,6 +50,41 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const handleInviteClick = () => {
+    if (onOpenInvite) {
+      onOpenInvite();
+    } else {
+      copyCode();
+    }
+  };
+
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingNameValue, setEditingNameValue] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  const handleStartEditing = (currentName: string) => {
+    setEditingNameValue(currentName);
+    setIsEditingName(true);
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditingName(false);
+  };
+
+  const handleSaveName = () => {
+    const trimmed = editingNameValue.trim();
+    if (trimmed && room?.code && memberId) {
+      const socket = useRoomStore.getState().socket;
+      socket?.emit('update-name', { code: room.code, name: trimmed });
+      useRoomStore.getState().updateMemberName(memberId, trimmed);
+      toast({
+        title: 'Name updated! ✦',
+        description: `Your name is now "${trimmed}".`,
+      });
+    }
+    setIsEditingName(false);
+  };
+
   // Render members list
   const renderMembersList = () => (
     <div className="space-y-2.5">
@@ -60,10 +102,29 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <Avatar userId={member.id} name={member.name} size="md" />
-              <div className="flex flex-col min-w-0 text-left">
-                <span className="text-sm font-semibold text-[#1B1B1B] truncate font-satoshi leading-tight">
-                  {member.name}
-                </span>
+              <div className="flex flex-col min-w-0 text-left flex-1">
+                {isCurrent && isEditingName ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      ref={editInputRef}
+                      type="text"
+                      value={editingNameValue}
+                      onChange={(e) => setEditingNameValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveName();
+                        if (e.key === 'Escape') handleCancelEditing();
+                      }}
+                      maxLength={32}
+                      className="w-full px-2 py-0.5 rounded-lg bg-white border border-[#EBE1D6] text-xs font-semibold text-[#1B1B1B] focus:outline-none focus:border-[#8FB3A6] font-satoshi shadow-sm"
+                      autoFocus
+                    />
+                  </div>
+                ) : (
+                  <span className="text-sm font-semibold text-[#1B1B1B] truncate font-satoshi leading-tight">
+                    {member.name}
+                  </span>
+                )}
+
                 {(isCurrent || isHost) && (
                   <div className="flex items-center gap-1.5 mt-0.5">
                     {isCurrent && (
@@ -84,7 +145,36 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
               </div>
             </div>
 
-            <div className="flex items-center shrink-0 pl-3">
+            {/* Right side: pencil icon (to left of green dot) + green online status dot */}
+            <div className="flex items-center shrink-0 gap-1.5 pl-2">
+              {isCurrent && (
+                isEditingName ? (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={handleSaveName}
+                      className="p-1 rounded-md text-emerald-600 hover:bg-emerald-50 transition-all"
+                      title="Save name"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={handleCancelEditing}
+                      className="p-1 rounded-md text-red-500 hover:bg-red-50 transition-all"
+                      title="Cancel"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleStartEditing(member.name)}
+                    className="p-1 rounded-md text-[#1B1B1B]/40 hover:text-[#1B1B1B] hover:bg-black/5 transition-all"
+                    title="Rename yourself"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                )
+              )}
               <span className="h-2 w-2 rounded-full bg-[#52B788]" />
             </div>
           </motion.div>
@@ -103,10 +193,7 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
     }
 
     return (
-      <div
-        ref={activityContainerRef}
-        className="max-h-[220px] overflow-y-auto pr-1 space-y-2 scrollbar-none"
-      >
+      <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1 scrollbar-none">
         <AnimatePresence initial={false}>
           {events.map((event, idx) => {
             const opacityVal = Math.max(0.25, 1 - idx * 0.15);
@@ -120,14 +207,16 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
                 className="flex items-center justify-between py-1 text-xs"
               >
                 <div className="flex items-center gap-2 font-satoshi font-medium min-w-0">
-                  <span className={cn(
-                    "h-1.5 w-1.5 rounded-full shrink-0 animate-pulse",
-                    event.type === 'join' && "bg-[#52B788]",
-                    event.type === 'leave' && "bg-red-400",
-                    event.type === 'queue-add' && "bg-orange-400",
-                    event.type === 'shuffle' && "bg-purple-500",
-                    event.type === 'repeat' && "bg-blue-500"
-                  )} />
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full shrink-0 animate-pulse",
+                      event.type === 'join' && "bg-[#52B788]",
+                      event.type === 'leave' && "bg-red-400",
+                      event.type === 'queue-add' && "bg-orange-400",
+                      event.type === 'shuffle' && "bg-purple-500",
+                      event.type === 'repeat' && "bg-blue-500"
+                    )}
+                  />
                   <span className="text-[#1B1B1B]/75 truncate">{event.text}</span>
                 </div>
                 <span className="text-[10px] text-[#1B1B1B]/40 font-mono pl-2 shrink-0 select-none">
@@ -150,34 +239,11 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
             <Users className="h-4 w-4 text-[#E07A5F]" /> People ({room.members.length})
           </h3>
           <button
-            onClick={copyCode}
-            className="inline-flex items-center justify-center h-7 px-2.5 rounded-lg bg-black/5 hover:bg-black/10 active:scale-95 transition-all text-xs font-medium font-satoshi text-[#1B1B1B]"
+            onClick={handleInviteClick}
+            className="inline-flex items-center justify-center h-8 px-3 rounded-xl bg-[#1B1B1B] hover:bg-black active:scale-95 transition-all text-xs font-semibold font-satoshi text-white shadow-sm"
           >
-            <AnimatePresence mode="wait">
-              {copied ? (
-                <motion.div
-                  key="check"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  className="flex items-center gap-1.5 text-emerald-700 font-semibold"
-                >
-                  <Check className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>Copied</span>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="copy"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  className="flex items-center gap-1"
-                >
-                  <span className="text-[#1B1B1B]/60 mr-1">Code: {room.code}</span>
-                  <Copy className="h-3.5 w-3.5 text-[#1B1B1B]/70" />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+            <span>Invite</span>
           </button>
         </div>
         {renderMembersList()}
@@ -192,13 +258,12 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
     );
   }
 
-  // Desktop Left Sidebar View (Warm Sand background, clean minimal items)
+  // Desktop Left Sidebar View
   return (
     <div className="flex h-full flex-col justify-between py-6 px-4 bg-[#EBE1D6] text-[#1B1B1B] border-r border-[#1B1B1B]/5">
       <div className="space-y-8">
         {/* Brand Logo */}
         <div className="flex items-center gap-2.5 px-2">
-          {/* Custom Groove record spiral logo */}
           <div className="relative h-7 w-7 flex items-center justify-center">
             <div className="absolute inset-0 rounded-full border border-charcoal/20 flex items-center justify-center animate-spin-slow">
               <div className="h-5 w-5 rounded-full border border-charcoal/30 flex items-center justify-center">
@@ -221,6 +286,7 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
           <button
             onClick={copyCode}
             className="inline-flex items-center justify-center h-7 px-2.5 rounded-lg bg-black/5 hover:bg-black/10 active:scale-95 transition-all text-xs font-medium font-satoshi text-[#1B1B1B]"
+            title="Copy Code"
           >
             <AnimatePresence mode="wait">
               {copied ? (
@@ -270,7 +336,7 @@ export function MembersSection({ isMobile = false }: { isMobile?: boolean }) {
       {/* Invite Button at bottom */}
       <div className="px-2 mt-6">
         <Button
-          onClick={copyCode}
+          onClick={handleInviteClick}
           className="w-full flex items-center justify-center gap-2 rounded-full border border-[#1B1B1B]/15 bg-transparent text-[#1B1B1B] hover:bg-black/5 transition-all font-medium py-3 text-xs tracking-wider uppercase shadow-none"
         >
           Invite people <UserPlus className="h-4 w-4" />

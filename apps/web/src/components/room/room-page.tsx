@@ -2,12 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import { PlayerSection } from '@/components/room/player-section';
 import { SearchSection } from '@/components/room/search-section';
 import { QueueSection } from '@/components/room/queue-section';
 import { MembersSection } from '@/components/room/members-section';
+import { InviteModal } from '@/components/room/invite-modal';
 import { Avatar } from '@/components/avatar';
 import { useRoomStore } from '@/store/room-store';
 import { useSocket } from '@/hooks/use-socket';
@@ -19,8 +18,6 @@ import type { JoinRoomResponse } from '@syncroom/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
-  Sun,
-  Moon,
   Music,
   Users,
   ListMusic,
@@ -44,6 +41,16 @@ export function RoomPage({ code }: { code: string }) {
   const [isDarkMode, setIsDarkMode] = useState(false); // default to clean light mode styles matching screenshot
   const inputRef = useRef<HTMLInputElement>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('created') === 'true') {
+      setShowInviteModal(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('created');
+      window.history.replaceState(null, '', url.toString());
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (joinedRef.current || (room?.code === code.toUpperCase() && memberId)) return;
@@ -163,7 +170,7 @@ export function RoomPage({ code }: { code: string }) {
       } catch (err) {
         const errMessage = err instanceof Error ? err.message : '';
         const isNetworkError = errMessage.toLowerCase().includes('failed to fetch') || errMessage.toLowerCase().includes('networkerror');
-        
+
         toast({
           title: isNetworkError ? 'Connection Error' : 'Room not found',
           description: isNetworkError
@@ -171,7 +178,7 @@ export function RoomPage({ code }: { code: string }) {
             : 'This room may have expired.',
           variant: 'destructive',
         });
-        
+
         if (!isNetworkError) {
           router.push('/');
         }
@@ -256,7 +263,7 @@ export function RoomPage({ code }: { code: string }) {
       <div className="hidden lg:flex flex-1 w-full min-h-screen overflow-hidden">
         {/* LEFT COLUMN: Sidebar (Vynyl Brand, Code copy, Members, Invite) */}
         <aside className="lg:w-64 xl:w-72 shrink-0">
-          <MembersSection />
+          <MembersSection onOpenInvite={() => setShowInviteModal(true)} />
         </aside>
 
         {/* RIGHT MAIN AREA: Core content + Header + Queue side column */}
@@ -441,7 +448,7 @@ export function RoomPage({ code }: { code: string }) {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                <MembersSection isMobile={true} />
+                <MembersSection isMobile={true} onOpenInvite={() => setShowInviteModal(true)} />
               </motion.div>
             )}
 
@@ -511,6 +518,13 @@ export function RoomPage({ code }: { code: string }) {
           </button>
         </nav>
       </div>
+
+      {/* Effortless Invitation Dialog Modal */}
+      <InviteModal
+        code={code}
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+      />
     </div>
   );
 }
