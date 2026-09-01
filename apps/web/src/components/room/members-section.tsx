@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Copy, Check, Users, UserPlus, Pencil, X } from 'lucide-react';
+import { Copy, Check, Users, UserPlus, Pencil, X, LogOut } from 'lucide-react';
 import { useRoomStore } from '@/store/room-store';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,9 +19,11 @@ function formatEventTime(timestamp: number): string {
 export function MembersSection({
   isMobile = false,
   onOpenInvite,
+  onOpenLeave,
 }: {
   isMobile?: boolean;
   onOpenInvite?: () => void;
+  onOpenLeave?: () => void;
 }) {
   const room = useRoomStore((s) => s.room);
   const memberId = useRoomStore((s) => s.memberId);
@@ -238,13 +240,25 @@ export function MembersSection({
           <h3 className="text-xs font-bold text-[#1B1B1B]/80 font-satoshi flex items-center gap-2">
             <Users className="h-4 w-4 text-[#E07A5F]" /> People ({room.members.length})
           </h3>
-          <button
-            onClick={handleInviteClick}
-            className="inline-flex items-center justify-center h-8 px-3 rounded-xl bg-[#1B1B1B] hover:bg-black active:scale-95 transition-all text-xs font-semibold font-satoshi text-white shadow-sm"
-          >
-            <UserPlus className="h-3.5 w-3.5 mr-1.5" />
-            <span>Invite</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleInviteClick}
+              className="inline-flex items-center justify-center h-8 px-3 rounded-xl bg-[#1B1B1B] hover:bg-black active:scale-95 transition-all text-xs font-semibold font-satoshi text-white shadow-sm"
+            >
+              <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+              <span>Invite</span>
+            </button>
+            {onOpenLeave && (
+              <button
+                onClick={onOpenLeave}
+                className="inline-flex items-center justify-center h-8 px-2.5 rounded-xl bg-black/5 hover:bg-red-500/10 hover:text-red-700 active:scale-95 transition-all text-xs font-semibold font-satoshi text-[#1B1B1B]/70"
+                title="Leave room"
+              >
+                <LogOut className="h-3.5 w-3.5 mr-1" />
+                <span>Leave</span>
+              </button>
+            )}
+          </div>
         </div>
         {renderMembersList()}
 
@@ -333,14 +347,24 @@ export function MembersSection({
         </div>
       </div>
 
-      {/* Invite Button at bottom */}
-      <div className="px-2 mt-6">
+      {/* Invite & Leave Buttons at bottom */}
+      <div className="px-2 mt-6 space-y-2">
         <Button
           onClick={handleInviteClick}
-          className="w-full flex items-center justify-center gap-2 rounded-full border border-[#1B1B1B]/15 bg-transparent text-[#1B1B1B] hover:bg-black/5 transition-all font-medium py-3 text-xs tracking-wider uppercase shadow-none"
+          className="w-full flex items-center justify-center gap-2 rounded-full border border-[#1B1B1B]/15 bg-transparent text-[#1B1B1B] hover:bg-black/5 transition-all font-medium py-2.5 text-xs tracking-wider uppercase shadow-none"
         >
           Invite people <UserPlus className="h-4 w-4" />
         </Button>
+
+        {onOpenLeave && (
+          <button
+            onClick={onOpenLeave}
+            className="w-full flex items-center justify-center gap-2 rounded-full py-2 px-3 text-xs font-medium text-[#1B1B1B]/50 hover:text-red-600 hover:bg-red-500/10 transition-all font-satoshi"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span>Leave Room</span>
+          </button>
+        )}
       </div>
     </div>
   );

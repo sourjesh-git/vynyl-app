@@ -24,6 +24,10 @@ const PRIORITY_PATTERNS = [
 const SEARCH_CACHE_TTL_SECONDS = 86400; // 24 Hours
 const CIRCUIT_BREAKER_TTL_SECONDS = 3600; // 1 Hour
 
+if (process.env.NODE_ENV !== 'production') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 @Injectable()
 export class SearchService {
   private readonly logger = new Logger(SearchService.name);
@@ -83,18 +87,21 @@ export class SearchService {
     // 1. Check Redis Cache
     const cached = await this.redis.get<SearchResult[]>(this.searchKey(normalized));
     if (cached && cached.length > 0) {
+      this.logger.log(`[Search] Cache HIT for "${normalized}" (${cached.length} results)`);
       return cached;
     }
+    this.logger.log(`[Search] Cache MISS for "${normalized}". Attempting fetch...`);
 
     // 2. Check Circuit Breaker (Is API Quota Burned Out?)
     const isQuotaExceeded = await this.redis.get<boolean>('yt:quota_exceeded');
     if (isQuotaExceeded) {
-      this.logger.warn(`Circuit breaker active [yt:quota_exceeded]. Routing query "${normalized}" to Public Search Parser.`);
+      this.logger.warn(`[Search] Circuit breaker ACTIVE [yt:quota_exceeded]. Routing query "${normalized}" to Public Search Scraper.`);
       return this.publicYouTubeSearch(normalized);
     }
 
     const apiKey = this.config.get<string>('YOUTUBE_API_KEY');
     if (!apiKey) {
+      this.logger.warn(`[Search] YOUTUBE_API_KEY is not set in environment. Routing query "${normalized}" to Public Search Scraper.`);
       return this.publicYouTubeSearch(normalized);
     }
 
@@ -114,17 +121,20 @@ export class SearchService {
 
       // If Quota Exceeded (HTTP 403 / 429), trigger circuit breaker
       if (searchRes.status === 403 || searchRes.status === 429) {
-        this.logger.error(`YouTube API quota limit reached (HTTP ${searchRes.status}). Triggering 1-hour circuit breaker.`);
+        const errText = await searchRes.text().catch(() => '');
+        this.logger.error(`[Search] YouTube API Quota/Rate Limit Exceeded (HTTP ${searchRes.status}). Response: ${errText.substring(0, 300)}. Triggering 1-hour circuit breaker.`);
         await this.redis.set('yt:quota_exceeded', true, CIRCUIT_BREAKER_TTL_SECONDS);
         return this.publicYouTubeSearch(normalized);
       }
 
       if (!searchRes.ok) {
+        const errText = await searchRes.text().catch(() => '');
+        this.logger.error(`[Search] YouTube API search returned HTTP ${searchRes.status}. Response: ${errText.substring(0, 300)}`);
         return this.publicYouTubeSearch(normalized);
       }
 
       const searchData = (await searchRes.json()) as {
-        error?: { code: number; message: string };
+        error?: { code: number; message: string; errors?: any[] };
         items?: Array<{
           id: { videoId: string };
           snippet: {
@@ -135,16 +145,19 @@ export class SearchService {
         }>;
       };
 
-      if (searchData.error?.code === 403) {
-        await this.redis.set('yt:quota_exceeded', true, CIRCUIT_BREAKER_TTL_SECONDS);
+      if (searchData.error) {
+        this.logger.error(`[Search] YouTube API Error JSON (code ${searchData.error.code}): ${searchData.error.message}`);
+        if (searchData.error.code === 403) {
+          await this.redis.set('yt:quota_exceeded', true, CIRCUIT_BREAKER_TTL_SECONDS);
+        }
         return this.publicYouTubeSearch(normalized);
       }
 
       const videoIds = searchData.items?.map((i) => i.id?.videoId).filter(Boolean) ?? [];
+      this.logger.log(`[Search] YouTube API v3 search returned ${videoIds.length} video IDs for "${normalized}".`);
       if (videoIds.length === 0) {
         return this.publicYouTubeSearch(normalized);
       }
-
 
       const detailsUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
       detailsUrl.searchParams.set('part', 'contentDetails,snippet,status');
@@ -191,18 +204,22 @@ export class SearchService {
       const finalResults = results.map(({ rank: _, ...rest }) => rest);
 
       if (finalResults.length > 0) {
+        this.logger.log(`[Search] YouTube API v3 SUCCESS: Cached and returning ${finalResults.length} tracks for "${normalized}".`);
         await this.redis.set(this.searchKey(normalized), finalResults, SEARCH_CACHE_TTL_SECONDS);
         return finalResults;
       }
 
+      this.logger.warn(`[Search] YouTube API v3 returned 0 usable tracks after filter. Routing to Public Search Scraper.`);
       return this.publicYouTubeSearch(normalized);
     } catch (err) {
-      this.logger.error(`YouTube API fetch failed: ${err instanceof Error ? err.message : String(err)}`);
+      const cause = (err as any)?.cause ? ` (Cause: ${(err as any).cause?.message || (err as any).cause?.code || (err as any).cause})` : '';
+      this.logger.error(`[Search] YouTube API fetch failed: ${err instanceof Error ? err.message : String(err)}${cause}`);
       return this.publicYouTubeSearch(normalized);
     }
   }
 
   private async publicYouTubeSearch(query: string): Promise<SearchResult[]> {
+    this.logger.log(`[PublicSearch] Attempting public YouTube scraper for query "${query}"...`);
     try {
       const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=EgIQAQ%253D%253D`;
       const res = await fetch(searchUrl, {
@@ -214,6 +231,7 @@ export class SearchService {
       });
 
       if (!res.ok) {
+        this.logger.error(`[PublicSearch] YouTube HTML scraper request returned HTTP ${res.status}. Routing to static fallback.`);
         return this.staticFallback(query);
       }
 
@@ -223,6 +241,7 @@ export class SearchService {
         html.match(/window\["ytInitialData"\] = ({.*?});/s);
 
       if (!match) {
+        this.logger.error(`[PublicSearch] Failed to extract ytInitialData JSON from HTML. YouTube layout may have changed. Routing to static fallback.`);
         return this.staticFallback(query);
       }
 
@@ -232,6 +251,7 @@ export class SearchService {
           ?.itemSectionRenderer?.contents;
 
       if (!Array.isArray(contents)) {
+        this.logger.error(`[PublicSearch] Parsed JSON lacks valid itemSectionRenderer contents. Routing to static fallback.`);
         return this.staticFallback(query);
       }
 
@@ -262,13 +282,16 @@ export class SearchService {
       }
 
       if (results.length > 0) {
+        this.logger.log(`[PublicSearch] Public YouTube scraper SUCCESS: Cached and returning ${results.length} tracks for "${query}".`);
         await this.redis.set(this.searchKey(query), results, SEARCH_CACHE_TTL_SECONDS);
         return results;
       }
 
+      this.logger.warn(`[PublicSearch] Scraper returned 0 valid videos for "${query}". Routing to static fallback.`);
       return this.staticFallback(query);
     } catch (err) {
-      this.logger.error(`Public YouTube search parsing error: ${err instanceof Error ? err.message : String(err)}`);
+      const cause = (err as any)?.cause ? ` (Cause: ${(err as any).cause?.message || (err as any).cause?.code || (err as any).cause})` : '';
+      this.logger.error(`[PublicSearch] Public YouTube search parsing error: ${err instanceof Error ? err.message : String(err)}${cause}`);
       return this.staticFallback(query);
     }
   }

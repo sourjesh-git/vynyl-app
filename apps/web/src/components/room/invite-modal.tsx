@@ -52,14 +52,14 @@ export function InviteModal({ code, isOpen, onClose }: InviteModalProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black/40 backdrop-blur-md"
+          className="fixed inset-0 bg-black/50 backdrop-blur-md"
           onClick={onClose}
         />
 
@@ -69,7 +69,7 @@ export function InviteModal({ code, isOpen, onClose }: InviteModalProps) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="relative w-full max-w-md bg-[#F6F3EE] border border-[#EBE1D6] rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.18)] text-[#1B1B1B] z-10"
+          className="relative w-full max-w-md bg-[#F6F3EE] border border-[#EBE1D6] rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.22)] text-[#1B1B1B] z-10 max-h-[90vh] overflow-y-auto my-auto"
         >
           {/* Top Right Close Button (X) */}
           <button
@@ -105,7 +105,7 @@ export function InviteModal({ code, isOpen, onClose }: InviteModalProps) {
             {/* Copy Link Button */}
             <button
               onClick={copyLink}
-              className="w-full sm:flex-1 h-12 rounded-xl bg-[#1B1B1B] hover:bg-black text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 font-satoshi"
+              className="group w-full sm:flex-1 h-12 rounded-xl bg-[#1B1B1B] hover:bg-black text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md transition-all duration-200 hover:-translate-y-[2px] active:scale-98 hover:shadow-lg font-satoshi"
             >
               {copiedLink ? (
                 <>
@@ -114,7 +114,7 @@ export function InviteModal({ code, isOpen, onClose }: InviteModalProps) {
                 </>
               ) : (
                 <>
-                  <LinkIcon className="h-4 w-4" />
+                  <LinkIcon className="h-4 w-4 group-hover:scale-105 transition-transform" />
                   <span>Copy link</span>
                 </>
               )}
@@ -123,7 +123,7 @@ export function InviteModal({ code, isOpen, onClose }: InviteModalProps) {
             {/* Copy Code Button */}
             <button
               onClick={copyCode}
-              className="w-full sm:flex-1 h-12 rounded-xl bg-[#EBE1D6] hover:bg-[#C7D1C0] text-[#1B1B1B] font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-98 font-satoshi"
+              className="group w-full sm:flex-1 h-12 rounded-xl bg-[#EBE1D6] hover:bg-[#C7D1C0] text-[#1B1B1B] font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition-all duration-200 hover:-translate-y-[2px] active:scale-98 hover:shadow-md font-satoshi"
             >
               {copiedCode ? (
                 <>
@@ -132,7 +132,7 @@ export function InviteModal({ code, isOpen, onClose }: InviteModalProps) {
                 </>
               ) : (
                 <>
-                  <Hash className="h-4 w-4 text-[#1B1B1B]/70" />
+                  <Hash className="h-4 w-4 text-[#1B1B1B]/70 group-hover:scale-105 transition-transform" />
                   <span>Copy code</span>
                 </>
               )}
