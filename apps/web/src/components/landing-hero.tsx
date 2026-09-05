@@ -518,7 +518,7 @@ function LandingFooter() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8 text-[12px] leading-relaxed text-[#1B1B1B]/70 font-satoshi">
         <div className="max-w-xl space-y-3">
           <p>
-            Audio is streamed through YouTube’s embedded player; all rights remain with the respective labels, composers and performers. Nothing is hosted here. Song credits are compiled from film soundtrack listings.
+            Audio is streamed through YouTube’s embedded player; all rights remain with the respective labels, composers and performers. Nothing is hosted here. Song credits are compiled from YouTube's search listings.
           </p>
           <p className="font-semibold text-[#1B1B1B]">
             Hold rights to something here and want it removed? Email{' '}
