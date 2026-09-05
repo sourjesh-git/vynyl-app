@@ -172,7 +172,7 @@ export function PlayerSection() {
               {playback.title}
             </h2>
             <p className="text-base text-[#FFFFF0] font-semibold font-satoshi">{playback.artist}</p>
-            <p className="text-[11px] text[#FFFFF0] mt-1 font-satoshi font-medium tracking-wide">
+            <p className="text-base text-[#FFFFF0] font-semibold font-satoshi">
               Added by {addedByName}
             </p>
           </div>
@@ -218,7 +218,7 @@ export function PlayerSection() {
             </div>
 
             {/* Time labels below waveform */}
-            <div className="flex justify-between text-xs font-semibold text-[#1B1B1B]/45 tracking-wider font-satoshi">
+            <div className="flex justify-between text-xs font-semibold text-[#FFFFF0] tracking-wider font-satoshi">
               <span>{formatDuration(progress)}</span>
               <span>{formatDuration(duration)}</span>
             </div>
@@ -288,16 +288,15 @@ export function PlayerSection() {
                 currentRepeatMode === 'one'
                   ? 'Repeat One'
                   : currentRepeatMode === 'all'
-                  ? 'Repeat All'
-                  : 'Repeat Off'
+                    ? 'Repeat All'
+                    : 'Repeat Off'
               }
-              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${
-                !isHost
-                  ? 'bg-[#1B1B1B]/15 text-[#1B1B1B]/40 cursor-not-allowed'
-                  : currentRepeatMode !== 'off'
+              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm ${!isHost
+                ? 'bg-[#1B1B1B]/15 text-[#1B1B1B]/40 cursor-not-allowed'
+                : currentRepeatMode !== 'off'
                   ? 'bg-[#E07A5F] text-white hover:bg-[#E07A5F]/90 shadow-md scale-105'
                   : 'bg-[#1B1B1B] text-white hover:bg-black'
-              }`}
+                }`}
             >
               {currentRepeatMode === 'one' ? (
                 <Repeat1 className="h-4.5 w-4.5" />
@@ -306,37 +305,6 @@ export function PlayerSection() {
               )}
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Rebuilt Premium Volume Slider */}
-      <div className="flex items-center gap-3.5 max-w-[220px] mt-4 group/volume mx-auto sm:mx-0 lg:mx-auto xl:mx-0 shrink-0">
-        <Button
-          size="icon"
-          className="h-10 w-10 rounded-full flex items-center justify-center transition-all shadow-sm bg-[#1B1B1B] text-white hover:bg-black shrink-0"
-          onClick={() => setMuted(!muted)}
-        >
-          {muted || volume === 0 ? (
-            <VolumeX className="h-4.5 w-4.5" />
-          ) : (
-            <Volume2 className="h-4.5 w-4.5" />
-          )}
-        </Button>
-        <div className="relative flex-1 flex items-center h-6">
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={muted ? 0 : volume}
-            onChange={(e) => {
-              setVolume(parseInt(e.target.value));
-              setMuted(false);
-            }}
-            style={{
-              background: `linear-gradient(to right, #E07A5F ${muted ? 0 : volume}%, rgba(224, 122, 95, 0.2) ${muted ? 0 : volume}%)`
-            }}
-            className="w-full h-1 rounded-full appearance-none cursor-pointer outline-none accent-[#E07A5F] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#E07A5F] [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:duration-150 [&::-webkit-slider-thumb]:hover:scale-125 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#E07A5F] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:hover:scale-125"
-          />
         </div>
       </div>
 
